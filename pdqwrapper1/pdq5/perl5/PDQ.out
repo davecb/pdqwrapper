@@ -1,0 +1,6 @@
+nodename : server  workname : work  time : 1.000000
+name : work  lambda : 0.750000
+name : server  device : 4  sched : 8
+nodename : server  workname : work  time : 1.000000
+name : work  lambda : 0.750000
+name : server  device : 4  sched : 8
