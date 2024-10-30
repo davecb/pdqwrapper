@@ -1,6 +1,6 @@
 
 /*
- * pdq -- report on a single queuing centre, based on
+ * pdq -- report on a closed queuing centre, based on
  *	closed_center.c from Gunther. This is what I use
  *	from the command-line 
  *	 
@@ -10,7 +10,8 @@
 #include <libgen.h>	/* For basename(). */
 #include <math.h>
 /* #include "/usr/local/pdq/lib/PDQ_Lib.h" */
-#include "/home/davecb/projects/PDQ2/pdq/pdq5/lib/PDQ_Lib.h"
+/* #include "/home/davecb/projects/PDQ2/pdq/pdq5/lib/PDQ_Lib.h" */
+#include "./pdq5/lib/PDQ_Lib.h"
 
 #define PREFORK
 #define STRESS	0
@@ -20,7 +21,7 @@ static char *ProgName = NULL;
 void doOneStep(double load, double think, double serviceDemand, double dmax, 
 	int verbose);
 
- int
+ void
 usage() {
 	fprintf(stderr, "Usage: %s [-z think][-s service][-d dmax][-vx] "
 		"-c centers from to by\n", ProgName);
@@ -50,7 +51,9 @@ main(int argc, char **argv) {
 		/* printf("argv[%d] = %s\n", i, argv[i]); */
 		if (argv[i][0] == '-') {
 			switch (argv[i][1]) {
-			case 'z': think = atof(argv[++i]);
+			case 'z':
+			case 't':
+			    think = atof(argv[++i]);
 				break;
 			case 'x': debug = 1;
 				break;
@@ -82,15 +85,25 @@ main(int argc, char **argv) {
 		by = atof(argv[i]);
 	}
 
-	/* Check target. */
-	if (to == 0.0) {
+	/* Check parameters. */
+	if (from < 0.0) {
+		(void) fprintf(stderr, "%s: from is negative, which is not defined. Halting.",
+		    ProgName);
+	}
+    if (from == 0.0) {
+        from = 1.0;
+    }
+	if (to <= 0.0) {
 		to = from;
+	}
+	if (by <= 0.0) {
+		by = 1.0;
 	}
 
 	/* Print headers. */
-	printf("\"# General closed solution from PDQ where "
-		"serviceDemand = %g, centers = %g,\"\n"
-	       "\"# think time = %g dmax = %g\"\n",
+	printf("General closed solution from PDQ where "
+		"serviceDemand = %g centers = %g "
+	       "think time = %g dmax = %g\n",
 	       serviceDemand, centers, think, dmax);
 	if (verbose) {
 		printf("Load\tThroughput\tUtilization\tQueueLen\t"
@@ -108,7 +121,7 @@ main(int argc, char **argv) {
 	else {
 		dmax = dmax / centers;
 	}
-	for (load=from; load < (to + 1.0); load += by) {
+	for (load=from; load <= to; load += by) {
 		doOneStep(load, think, serviceDemand, dmax, verbose);
 	}
 	if (debug == 1) {
@@ -128,11 +141,7 @@ doOneStep(double load, double think, double serviceDemand, double dmax,
 	static char server_name[80] = "";
 	int	i;
 
-	extern double	PDQ_GetResponse();
-	extern double	PDQ_GetThruput();
-	extern double	PDQ_GetUtilization();
-
-	/* PDQ_SetDebug(1); */
+	/* optionally, one can set PDQ_SetDebug(1); */
 	PDQ_Init("closed uniserver"); /* Name model. */
 
 	/* Define workload and queuing circuit type. */

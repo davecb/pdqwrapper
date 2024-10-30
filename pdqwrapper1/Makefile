@@ -1,4 +1,3 @@
-#all: trivial
 all: pdq simple_test
 
 
