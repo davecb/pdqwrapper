@@ -183,4 +183,15 @@ PDQ_GetQueueLength
 PDQ_GetResidenceTime
 PDQ_GetResponse
 PDQ_Report
+
+see https://karthikkaranth.me/blog/calling-c-code-from-go/
+and
+static:
+    gcc -c gb.c
+    ar -rcs libgb.a gb.o
+    go build -ldflags "-linkmode external -extldflags -static" bridge.go
+
+dynamic:
+    gcc -shared -o libgb.so gb.c
+    go build bridge.go
 */

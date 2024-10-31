@@ -1,0 +1,37 @@
+package pdq
+
+CreateClosed = *pdqc::CreateClosed;
+CreateClosed_p = *pdqc::CreateClosed_p;
+CreateOpen = *pdqc::CreateOpen;
+CreateOpen_p = *pdqc::CreateOpen_p;
+CreateNode = *pdqc::CreateNode;
+CreateMultiNode = *pdqc::CreateMultiNode;
+GetStreamsCount = *pdqc::GetStreamsCount;
+GetNodesCount = *pdqc::GetNodesCount;
+GetResponse = *pdqc::GetResponse;
+GetResidenceTime = *pdqc::GetResidenceTime;
+GetThruput = *pdqc::GetThruput;
+GetLoadOpt = *pdqc::GetLoadOpt;
+GetUtilization = *pdqc::GetUtilization;
+GetQueueLength = *pdqc::GetQueueLength;
+PDQ_GetThruMax = *pdqc::PDQ_GetThruMax;
+Init = *pdqc::Init;
+Report = *pdqc::Report;
+SetDebug = *pdqc::SetDebug;
+SetDemand = *pdqc::SetDemand;
+SetDemand_p = *pdqc::SetDemand_p;
+SetVisits = *pdqc::SetVisits;
+SetVisits_p = *pdqc::SetVisits_p;
+Solve = *pdqc::Solve;
+SetWUnit = *pdqc::SetWUnit;
+SetTUnit = *pdqc::SetTUnit;
+SetComment = *pdqc::SetComment;
+GetComment = *pdqc::GetComment;
+PrintNodes = *pdqc::PrintNodes;
+GetNode = *pdqc::GetNode;
+getjob = *pdqc::getjob;
+resets = *pdqc::resets;
+debug = *pdqc::debug;
+errmsg = *pdqc::errmsg;
+approx = *pdqc::approx;
+
