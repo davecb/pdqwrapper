@@ -23,7 +23,7 @@ void doOneStep(double load, double think, double serviceDemand, double dmax,
 
  void
 usage() {
-	fprintf(stderr, "Usage: %s [-z think][-s service][-d dmax][-vx] "
+	fprintf(stderr, "Usage: %s [-t think][-z sleep][-s service][-d dmax][-vx] "
 		"-c centers from to by\n", ProgName);
 }
 
@@ -65,6 +65,9 @@ main(int argc, char **argv) {
 				break;
 			case 'v': verbose = 1;
 				break;
+			case 'h': 
+				usage();
+				exit(0);
 			default:
 				(void) fprintf(stderr,
 				       "%s: unknown option -%c, ignored.\n",
@@ -75,6 +78,16 @@ main(int argc, char **argv) {
 			break;
 		}
 	}
+	/* Check options */
+	if (serviceDemand <= 0) {
+	    (void) fprintf(stderr, "%s: -s is <= 0.0 and is not supported. Halting.\n",
+            ProgName);
+        	exit(1);
+	}
+	/* if (dmax <= 0 */
+	/* f (centers <= 0 */
+
+	/* collect from to and by parameters */
 	if (i < argc) {
 		from = atof(argv[i++]);
 	}
@@ -89,6 +102,7 @@ main(int argc, char **argv) {
 	if (from < 0.0) {
 		(void) fprintf(stderr, "%s: from is negative, which is not defined. Halting.",
 		    ProgName);
+		    exit(1);
 	}
     if (from == 0.0) {
         from = 1.0;
@@ -100,19 +114,6 @@ main(int argc, char **argv) {
 		by = 1.0;
 	}
 
-	/* Print headers. */
-	printf("General closed solution from PDQ where "
-		"serviceDemand = %g centers = %g "
-	       "think time = %g dmax = %g\n",
-	       serviceDemand, centers, think, dmax);
-	if (verbose) {
-		printf("Load\tThroughput\tUtilization\tQueueLen\t"
-			"Residence\tResponse\n");
-	}
-	else {
-		printf("\"# Load,\" Response\n");
-	}
-
 	/* Adjust Dmax if we have more than one center. */
 	if (dmax == 0.0 && centers != 1) {
 		printf("Dmax must be non-zero for this model.\n");
@@ -121,12 +122,36 @@ main(int argc, char **argv) {
 	else {
 		dmax = dmax / centers;
 	}
+	if (debug == 1) {
+    	    (void) printf(
+                "serviceDemand = %g "
+                "think time = %g "
+                "dmax = %g "
+                 "centers = %g "
+                 "from = g "
+                 "to = %g "
+                 "by = %g\n",
+    	        serviceDemand, think, dmax, centers, from, to, by);
+    }
+    /* Print headers. */
+    printf("General closed solution from PDQ where "
+    	"serviceDemand = %g centers = %g "
+           "think time = %g dmax = %g\n",
+           serviceDemand, centers, think, dmax);
+    if (verbose) {
+    	printf("Load\tThroughput\tUtilization\tQueueLen\t"
+    		"Residence\tResponse\n");
+    }
+    else {
+    	printf("\"# Load,\" Response\n");
+    }
 	for (load=from; load <= to; load += by) {
 		doOneStep(load, think, serviceDemand, dmax, verbose);
 	}
-	if (debug == 1) {
-		PDQ_Report();
-	}
+	/* if (debug == 1) {
+	 *	PDQ_Report(); optional
+	 * }
+	 */
 	exit(0);
 }
 
@@ -166,7 +191,7 @@ doOneStep(double load, double think, double serviceDemand, double dmax,
 			(void) sprintf(server_name, "server%d", i);
 			nodes = PDQ_CreateNode(server_name, CEN, FCFS);
 			if (serviceDemand > (dmax/2)) {
-				/* Do half a dmax. */
+				/* Do half of a dmax. */
 				PDQ_SetDemand(server_name, "work", dmax/2);
 				serviceDemand -= (dmax/2);
 			}
