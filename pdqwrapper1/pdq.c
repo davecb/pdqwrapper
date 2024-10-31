@@ -80,12 +80,16 @@ main(int argc, char **argv) {
 	}
 	/* Check options */
 	if (serviceDemand <= 0) {
-	    (void) fprintf(stderr, "%s: -s is <= 0.0 and is not supported. Halting.\n",
+	    (void) fprintf(stderr, "%s: -s is <= 0.0 which is not supported. Halting.\n",
             ProgName);
         	exit(1);
 	}
-	/* if (dmax <= 0 */
-	/* f (centers <= 0 */
+	if (think < 0.0) {
+	    void) fprintf(stderr, "%s: -t is < 0.0 which is not supported. Halting.\n",
+                ProgName);
+            	exit(1);
+	}
+
 
 	/* collect from to and by parameters */
 	if (i < argc) {
