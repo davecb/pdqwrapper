@@ -1,8 +1,7 @@
-
 /*
  * pdq -- report on a closed queuing centre, based on
  *	closed_center.c from Gunther. This is what I use
- *	from the command-line 
+ *	from the command-line.
  *	 
  */
 #include <stdio.h>

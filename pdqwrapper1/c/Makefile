@@ -9,7 +9,7 @@ install:
 	-/usr/local/bin/pdq -h
 
 simple_test: pdq
-	./pdq -z 0.9 -s 0.1 -v 1 10 1
+	./pdq -t 0.9 -s 0.1 -v 1 10 1
 
 gdb:
 	gdb --args ./pdq -x 0 1 1
