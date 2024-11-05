@@ -9,22 +9,21 @@
 #include <stdlib.h>	/* For exit(). */
 #include <libgen.h>	/* For basename(). */
 #include <math.h>
-/* #include "/usr/local/pdq/lib/PDQ_Lib.h" */
+/* #include "/usr/local/pdq/lib/PDQ_Lib.h"  -- old location*/
 /* #include "/home/davecb/projects/PDQ2/pdq/pdq5/lib/PDQ_Lib.h" */
-#include "./pdq5/lib/PDQ_Lib.h"
+#include "../pdq5/lib/PDQ_Lib.h"
 
 #define PREFORK
 #define STRESS	0
 #define HOMEPG	1
 
 static char *ProgName = NULL;
-void doOneStep(double load, double think, double serviceTime, double dmax, 
-	int verbose);
+void doOneStep(double load, double think, double serviceTime, int verbose);
 
  void
 usage() {
-	fprintf(stderr, "Usage: %s [-t think][-z sleep][-s service][-d dmax][-vx] "
-		"-c centers from to by\n", ProgName);
+	fprintf(stderr, "Usage: %s [-t think][-z sleep][-s service][-vd] "
+		"from to by\n", ProgName);
 }
 
  int
@@ -34,8 +33,6 @@ main(int argc, char **argv) {
 		by = 0.0,
 		think = 0.0,   
 		serviceTime = 0.0, 
-		dmax = 0.0,
-		centers = 1.0,
 		load;
 	int	verbose = 0,
 		debug = 0;
@@ -55,19 +52,15 @@ main(int argc, char **argv) {
 			case 't':
 			    think = atof(argv[++i]);
 				break;
-			case 'x': debug = 1;
-				break;
-			case 'd': dmax = atof(argv[++i]);
+			case 'h':
+				usage(ProgName);
+				exit(0);
+			case 'd': debug = 1;
 				break;
 			case 's': serviceTime = atof(argv[++i]);
 				break;
-			case 'c': centers = atof(argv[++i]);
-				break;
 			case 'v': verbose = 1;
 				break;
-			case 'h': 
-				usage();
-				exit(0);
 			default:
 				(void) fprintf(stderr,
 				       "%s: unknown option -%c, ignored.\n",
@@ -118,37 +111,28 @@ main(int argc, char **argv) {
 		by = 1.0;
 	}
 
-	/* Adjust Dmax if we have more than one center. */
-	if (dmax == 0.0 && centers != 1) {
-		printf("Dmax must be non-zero for multi-center models.\n");
-		exit(3);
-	}
-	else {
-		dmax = dmax / centers;
-	}
 	if (debug == 1) {
     	    (void) printf(
                 "serviceTime = %g "
                 "think time = %g "
-                "dmax = %g "
+                "from %g "
                 "to = %g "
                 "by = %g\n",
-    	        serviceTime, think, dmax, centers, from, to, by);
+    	        serviceTime, think, from, to, by);
     }
     /* Print headers. */
     printf("General closed solution from PDQ where "
-    	"serviceTime = %g centers = %g "
-           "think time = %g dmax = %g\n",
-           serviceTime, centers, think, dmax);
+    	"serviceTime = %g think time = %g\n",
+           serviceTime, think);
     if (verbose) {
     	printf("Load\tThroughput\tUtilization\tQueueLen\t"
     		"Residence\tResponse\n");
     }
     else {
-    	printf("\"# Load,\" Response\n");
+    	printf("Load\tResponse\n");
     }
 	for (load=from; load <= to; load += by) {
-		doOneStep(load, think, serviceTime, dmax, verbose);
+		doOneStep(load, think, serviceTime, verbose);
 	}
 	/* if (debug == 1) {
 	 *	PDQ_Report(); optional
@@ -162,8 +146,7 @@ main(int argc, char **argv) {
  * doOneStep -- do one solution step
  */
  void
-doOneStep(double load, double think, double serviceTime, double dmax, 
-	int verbose) {
+doOneStep(double load, double think, double serviceTime, int verbose) {
 	extern int	nodes, streams;
 	static char server_name[80] = "";
 	int	i;
@@ -174,38 +157,10 @@ doOneStep(double load, double think, double serviceTime, double dmax,
 	/* Define workload and queuing circuit type. */
 	streams = PDQ_CreateClosed("work", TERM, load, think);
 
-	if (dmax == 0.0) {
-		/* Create a single node, with a demand of serviceTime */
-		(void) sprintf(server_name, "server0"); 
-		nodes = PDQ_CreateNode(server_name, CEN, FCFS);
-		PDQ_SetDemand(server_name, "work", serviceTime);
-	}
-	else {
-		/* Construct a dmax node and then a list of nodes, 
- 		 * of size << dmax, all totalling serviceTime.
-		 */
-		(void) sprintf(server_name, "server0");
-		nodes = PDQ_CreateNode(server_name, CEN, FCFS);
-		PDQ_SetDemand(server_name, "work", dmax);
-		serviceTime -= dmax;
-
-		for (i=1; serviceTime > 0.0; i++) {
-			(void) sprintf(server_name, "server%d", i);
-			nodes = PDQ_CreateNode(server_name, CEN, FCFS);
-			if (serviceTime > (dmax/2)) {
-				/* Do half of a dmax. */
-				PDQ_SetDemand(server_name, "work", dmax/2);
-				serviceTime -= (dmax/2);
-			}
-			else {
-				/* Last one, do the remainder. */
-				PDQ_SetDemand(server_name, "work", 
-					serviceTime);
-				break;
-			}
-		}
-	}
-
+	/* Create a single node, with a demand of serviceTime */
+	(void) sprintf(server_name, "server0");
+	nodes = PDQ_CreateNode(server_name, CEN, FCFS);
+	PDQ_SetDemand(server_name, "work", serviceTime);
 	PDQ_Solve(EXACT);
 
 	if (verbose) {
@@ -218,7 +173,7 @@ doOneStep(double load, double think, double serviceTime, double dmax,
 			PDQ_GetResponse(TERM, "work"));
 	}
 	else {
-		printf("%d,\t%f\n",(int) load, PDQ_GetResponse(TERM, "work"));
+		printf("%d\t%f\n",(int) load, PDQ_GetResponse(TERM, "work"));
 	}
 
 } /* doOneStep */

@@ -216,3 +216,8 @@ fn do_one_step(load: f64, think: f64, mut service_time: f64, dmax: f64, verbose:
  * Better memory safety
  * More structured control flow
  */
+
+/* 
+ * see also https://opensource.com/article/22/11/rust-calls-c-library-functions
+ * for the rust FFI
+ */

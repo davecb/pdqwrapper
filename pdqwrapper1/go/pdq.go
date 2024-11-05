@@ -21,7 +21,7 @@ var (
 )
 
 func usage(progName string) {
-	fmt.Fprintf(os.Stderr, "Usage: %s [-z think][-s service][-d dmax][-vx] -c centers from to by\n", progName)
+	fmt.Fprintf(os.Stderr, "Usage: %s [-z think][-s service][-vd] from to by\n", progName)
 }
 
 func main() {
@@ -31,8 +31,6 @@ func main() {
 		by            = 0.0
 		think         = 0.0
 		serviceDemand = 0.0
-		dmax          = 0.0
-		centers       = 1.0
 		verbose       = false
 		debug         = false
 	)
@@ -48,20 +46,17 @@ func main() {
 	i := 1
 	for i < len(os.Args) && os.Args[i][0] == '-' {
 		switch os.Args[i][1] {
+		case 'h':
+			usage(progName)
+			exit(0)
 		case 'z', 't':
 			i++
 			think, _ = strconv.ParseFloat(os.Args[i], 64)
-		case 'x':
+		case 'd', 'x':
 			debug = true
-		case 'd':
-			i++
-			dmax, _ = strconv.ParseFloat(os.Args[i], 64)
 		case 's':
 			i++
 			serviceDemand, _ = strconv.ParseFloat(os.Args[i], 64)
-		case 'c':
-			i++
-			centers, _ = strconv.ParseFloat(os.Args[i], 64)
 		case 'v':
 			verbose = true
 		default:
@@ -99,8 +94,8 @@ func main() {
 	}
 
 	// Print headers
-	fmt.Printf("General closed solution from PDQ where serviceDemand = %g centers = %g think time = %g dmax = %g\n",
-		serviceDemand, centers, think, dmax)
+	fmt.Printf("General closed solution from PDQ where serviceDemand = %g think time = %g\n",
+		serviceDemand, think)
 
 	if verbose {
 		fmt.Printf("Load\tThroughput\tUtilization\tQueueLen\tResidence\tResponse\n")
@@ -108,16 +103,8 @@ func main() {
 		fmt.Printf("\"# Load,\" Response\n")
 	}
 
-	// Adjust Dmax if we have more than one center
-	if dmax == 0.0 && centers != 1 {
-		fmt.Println("Dmax must be non-zero for this model.")
-		os.Exit(3)
-	} else {
-		dmax = dmax / centers
-	}
-
 	for load := from; load <= to; load += by {
-		doOneStep(load, think, serviceDemand, dmax, verbose)
+		doOneStep(load, think, serviceDemand, verbose)
 	}
 
 	if debug {
@@ -125,34 +112,15 @@ func main() {
 	}
 }
 
-func doOneStep(load, think, serviceDemand, dmax float64, verbose bool) {
+func doOneStep(load, think, serviceDemand float64, verbose bool) {
 	serverName := ""
 
 	PDQ_Init("closed uniserver")
 	streams = PDQ_CreateClosed("work", TERM, load, think)
 
-	if dmax == 0.0 {
-		serverName = "server0"
-		nodes = PDQ_CreateNode(serverName, CEN, FCFS)
-		PDQ_SetDemand(serverName, "work", serviceDemand)
-	} else {
-		serverName = "server0"
-		nodes = PDQ_CreateNode(serverName, CEN, FCFS)
-		PDQ_SetDemand(serverName, "work", dmax)
-		serviceDemand -= dmax
-
-		for i := 1; serviceDemand > 0.0; i++ {
-			serverName = fmt.Sprintf("server%d", i)
-			nodes = PDQ_CreateNode(serverName, CEN, FCFS)
-			if serviceDemand > (dmax / 2) {
-				PDQ_SetDemand(serverName, "work", dmax/2)
-				serviceDemand -= (dmax / 2)
-			} else {
-				PDQ_SetDemand(serverName, "work", serviceDemand)
-				break
-			}
-		}
-	}
+	serverName = "server0"
+	nodes = PDQ_CreateNode(serverName, CEN, FCFS)
+	PDQ_SetDemand(serverName, "work", serviceDemand)
 
 	PDQ_Solve(EXACT)
 
