@@ -77,10 +77,10 @@ func main() {
 	if i < len(os.Args) {
 		by, _ = strconv.ParseFloat(os.Args[i], 64)
 	}
-	pdf(think, serviceDemand, from, to, by)
+	pdq(progName, think, serviceDemand, from, to, by, verbose, debug)
 }
 
-func pdf(think, serviceDemand, from, to, by float64) {
+func pdq(progName string, think, serviceDemand, from, to, by float64, verbose, debug bool) {
 	// Check parameters
 	if from < 0.0 {
 		fmt.Fprintf(os.Stderr, "%s: from is negative, which is not defined. Halting.", progName)
@@ -96,15 +96,15 @@ func pdf(think, serviceDemand, from, to, by float64) {
 		by = 1.0
 	}
 
-	// Print headers
-	fmt.Printf("General closed solution from PDQ where serviceDemand = %g think time = %g\n",
-		serviceDemand, think)
-
-	if verbose {
-		fmt.Printf("Load\tThroughput\tUtilization\tQueueLen\tResidence\tResponse\n")
-	} else {
-		fmt.Printf("\"# Load,\" Response\n")
-	}
+	//// Print headers
+	//fmt.Printf("General closed solution from PDQ where serviceTime = %g think time = %g\n",
+	//	serviceDemand, think)
+	//
+	//if verbose {
+	//	fmt.Printf("Load\tThroughput\tUtilization\tQueueLen\tResidence\tResponse\n")
+	//} else {
+	//	fmt.Printf("\"# Load,\" Response\n")
+	//}
 
 	for load := from; load <= to; load += by {
 		doOneStep(load, think, serviceDemand, verbose)
@@ -113,6 +113,6 @@ func pdf(think, serviceDemand, from, to, by float64) {
 }
 
 func doOneStep(load, think, serviceDemand float64, verbose bool) {
-	fmt.Fprintf(os.Stderr, "load = %g think = %g"+
-		"serviceTime = %g verbose = %d\n", load, think, serviceDemand, verbose)
+	fmt.Fprintf(os.Stderr, "load = %g think = %g "+
+		"serviceTime = %g verbose = %t\n", load, think, serviceDemand, verbose)
 }

@@ -14,59 +14,61 @@ import (
 // from is a positive number, defaulting to 1
 // to is a positive number, invalid if less than from
 // by is a positive number, smaller than to-from
-func Test_pdf(t *testing.T) {
-	type args struct {
-	}
+func Test_pdq(t *testing.T) {
+	var progName = "pdq"
 	tests := []struct {
-		name          string
-		think         float64
-		serviceDemand float64
-		from          float64
-		to            float64
-		by            float64
+		name        string
+		think       float64
+		serviceTime float64
+		from        float64
+		to          float64
+		by          float64
 	}{
 		{
-			name:          "fred",
-			think:         1.0,
-			serviceDemand: 1.0,
-			from:          1.0,
-			to:            1.0,
-			by:            1.0,
+			name:        "fred",
+			think:       1.0,
+			serviceTime: 1.0,
+			from:        1.0,
+			to:          1.0,
+			by:          1.0,
 		},
 	}
+	var verbose, debug bool
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			pdf(tt.think, tt.serviceDemand, tt.from, tt.to, tt.by)
+			pdq(progName, tt.think, tt.serviceTime, tt.from, tt.to, tt.by, verbose, debug)
 		})
 	}
 
-	var p Positive
+	var p PositiveFloat64
+	p = p.New() // Instantiate a positive-number iterator
 
-	p = p.New() // Instantiate a positive
 	var q float64
-	q = p.Next()
-	fmt.Printf("after initialization, q %g == 1.0\n", q)
+	var ok bool
+	q, ok = p.Next()
+	fmt.Printf("after initialization, q %g == 1.0, ok %t -= true\n", q, ok)
 
 }
 
-// Positive is a number > 0. It is initially implemented as a float64 to get
-// more range than an int64, but that's mostly an artifact of how it was
-// developed. It's subject to change or reconsideration entirely.
-type Positive struct {
+// PositiveFloat64 is a number > 0. It's subject to change or reconsideration entirely.
+// Barely started (:-)), should be an iterator, so I can range over it.
+type PositiveFloat64 struct {
 	Value float64
+	Legal bool
 }
 
-// Positive is a container for a positive number
-
-// New returns an initialized Positive, p
-func (p Positive) New() Positive {
-	p.Value = 0 // the initial Next() will return 1
+// PositiveFloat64 is a container for a positive number
+// New returns an initialized PositiveFloat64
+func (p PositiveFloat64) New() PositiveFloat64 {
+	p.Value = 0 // the initial Next() will return 1, FIXME
+	p.Legal = true
 	return p
 }
 
 // Next returns the next integer value of p
-func (p Positive) Next() float64 {
-	q := p.Value
+func (p PositiveFloat64) Next() (float64, bool) {
 	p.Value++
-	return q
+	return p.Value, p.Legal
 }
+
+// iteration should return (-MAXFLOAT, false), ... (0, false), (1, true) ...
