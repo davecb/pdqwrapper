@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"testing"
 )
 
@@ -15,60 +16,88 @@ import (
 // to is a positive number, invalid if less than from
 // by is a positive number, smaller than to-from
 func Test_pdq(t *testing.T) {
-	var progName = "pdq"
-	tests := []struct {
-		name        string
-		think       float64
-		serviceTime float64
-		from        float64
-		to          float64
-		by          float64
-	}{
-		{
-			name:        "fred",
-			think:       1.0,
-			serviceTime: 1.0,
-			from:        1.0,
-			to:          1.0,
-			by:          1.0,
-		},
-	}
-	var verbose, debug bool
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			pdq(progName, tt.think, tt.serviceTime, tt.from, tt.to, tt.by, verbose, debug)
-		})
-	}
+	//var progName = "pdq"
+	//tests := []struct {
+	//	name        string
+	//	think       float64
+	//	serviceTime float64
+	//	from        float64
+	//	to          float64
+	//	by          float64
+	//}{
+	//	{
+	//		name:        "fred",
+	//		think:       1.0,
+	//		serviceTime: 1.0,
+	//		from:        1.0,
+	//		to:          1.0,
+	//		by:          1.0,
+	//	},
+	//}
+	////var verbose, debug bool
+	//for _, tt := range tests {
+	//	t.Run(tt.name, func(t *testing.T) {
+	//		pdq(progName, tt.think, tt.serviceTime, tt.from, tt.to, tt.by, verbose, debug)
+	//	})
+	//}
 
 	var p PositiveFloat64
-	p = p.New() // Instantiate a positive-number iterator
+	var limit int
+	p, limit = p.New() // Instantiate a positive-number iterator
+	fmt.Printf("after initialization, s = %g, ok == %t, limit == %d\n", p.Value, p.Legal, limit)
 
-	var q float64
+	var d1 float64
 	var ok bool
-	q, ok = p.Next()
-	fmt.Printf("after initialization, q %g == 1.0, ok %t -= true\n", q, ok)
-
+	for i := 0; i < 15; d1, ok = p.Next() {
+		fmt.Printf("%d: d1 = %g, ok == %t\n", i, d1, ok)
+		i++ //foo(d1, ok)
+	}
 }
+
+//func foo(sample float64, ok bool) {
+//	fmt.Printf("after initialization, s = %g, ok == %t\n", sample, ok)
+//}
 
 // PositiveFloat64 is a number > 0. It's subject to change or reconsideration entirely.
 // Barely started (:-)), should be an iterator, so I can range over it.
 type PositiveFloat64 struct {
-	Value float64
-	Legal bool
+	Value          float64
+	Legal          bool
+	index          int
+	sampleFloat64s []float64
 }
 
 // PositiveFloat64 is a container for a positive number
 // New returns an initialized PositiveFloat64
-func (p PositiveFloat64) New() PositiveFloat64 {
-	p.Value = 0 // the initial Next() will return 1, FIXME
+func (p PositiveFloat64) New() (PositiveFloat64, int) {
+	p.Value = 0.0
 	p.Legal = true
-	return p
+	p.index = 0
+	p.sampleFloat64s = []float64{
+		-math.MaxFloat64,
+		-math.MaxFloat64 + 1,
+		-math.MaxFloat64 / 2,
+		-math.MaxFloat64/2 + 1,
+		-3, -2, -1, 0, 1, 2, 3,
+		math.MaxFloat64/2 - 1,
+		math.MaxFloat64 / 2,
+		math.MaxFloat64 - 1,
+		math.MaxFloat64,
+	}
+	return p, len(p.sampleFloat64s)
 }
 
-// Next returns the next integer value of p
-func (p PositiveFloat64) Next() (float64, bool) {
-	p.Value++
+// Next returns a counter, the next value from the list of samples, and true if
+// the value is positive.
+func (p *PositiveFloat64) Next() (float64, bool) {
+
+	p.Value = p.sampleFloat64s[p.index]
+	p.index++
+
+	if p.Value > 0.0 {
+		p.Legal = true
+	} else {
+		p.Legal = false
+	}
 	return p.Value, p.Legal
 }
-
-// iteration should return (-MAXFLOAT, false), ... (0, false), (1, true) ...
