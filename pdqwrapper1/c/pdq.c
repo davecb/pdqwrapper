@@ -103,7 +103,7 @@ main(int argc, char **argv) {
     if (from == 0.0) {
         from = 1.0;
     }
-	if (to <= 0.0) {
+	if (to <= 0.0) { 	/* FIXME check that we have less than 1000 users */
 		to = from;
 	}
 	if (by <= 0.0) {
@@ -154,13 +154,13 @@ doOneStep(double load, double think, double serviceTime, int verbose) {
 	PDQ_Init("closed uniserver"); /* Name model. */
 
 	/* Define workload and queuing circuit type. */
-	streams = PDQ_CreateClosed("work", TERM, load, think);
+	streams = PDQ_CreateClosed("work", TERM, load, think); // * TERM, etc is defined in .h file */
 
 	/* Create a single node, with a demand of serviceTime */
 	(void) sprintf(server_name, "server0");
 	nodes = PDQ_CreateNode(server_name, CEN, FCFS);
 	PDQ_SetDemand(server_name, "work", serviceTime);
-	PDQ_Solve(EXACT);
+	PDQ_Solve(EXACT); /* EXACT allows a load of <= 1000 users */
 
 	if (verbose) {
 		printf("%d\t%f\t%f\t%f\t%f\t%f\n",

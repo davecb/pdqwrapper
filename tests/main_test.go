@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-// func Pdq(progName string, think, serviceDemand, from, to, by float64, verbose, debug bool) {
+// func Wrapper(progName string, think, serviceDemand, from, to, by float64, verbose, debug bool) {
 // t is positive number, upper bound unknown
 // z sleep is synonymous with t
 // s is service time, positibe number, upper bound unknown
@@ -51,7 +51,7 @@ func Test_pdq(t *testing.T) {
 			//fmt.Printf("s%d: Value = %d, Legal = %t\n",
 			//	s, sStruct.Value, sStruct.Legal)
 			// inner test
-			err := Pdq("unit test", float64(zStruct.Value), float64(sStruct.Value), 1, 2, 1, false, false)
+			err := Wrapper("unit test", float64(zStruct.Value), float64(sStruct.Value), 1, 1, 1, false, false)
 			if err != nil {
 				t.Errorf("fail with z(%d) = %g, s(%d), %g\n",
 					z, float64(zStruct.Value), s, float64(sStruct.Value))

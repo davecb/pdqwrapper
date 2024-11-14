@@ -1,11 +1,5 @@
 package main
 
-//import "os"
-//
-//func main() {
-//	os.Exit(0)
-//}
-
 import (
 	"fmt"
 	"os"
@@ -71,7 +65,7 @@ func main() {
 		i++
 	}
 
-	// Parse remaining arguments
+	// Parse remaining arguments FIXME, these are floats
 	if i < len(os.Args) {
 		from, _ = strconv.Atoi(os.Args[i])
 		i++
@@ -83,36 +77,39 @@ func main() {
 	if i < len(os.Args) {
 		by, _ = strconv.Atoi(os.Args[i])
 	}
-	Pdq(progName, think, serviceDemand, from, to, by, verbose, debug)
+	Wrapper(progName, think, serviceDemand, from, to, by, verbose, debug)
 }
 
-func Pdq(progName string, thinkTime, serviceTime float64, from, to, by int, verbose, debug bool) error {
+// Wrapper is the code that calls the pdq library
+func Wrapper(progName string, thinkTime, serviceTime float64, from, to, by int, verbose, debug bool) error {
 	// Check parameters
+	// FIXME can these be floats??? The library accepts them, so yes. Future extension
 	if from < 0 {
 		return fmt.Errorf("%s: \"from\" is negative, which is not defined. Halting.", progName)
 	}
 	if from == 0 {
-		// from iss only well-defined for positives, but choosing is a common, harmless user error
+		// from is only well-defined for positives, but choosing is a common, harmless user error
 		from = 1
 	}
 	if to <= 0 {
-		// this is bad code!   FIXME in the refactor
+		// this is bad code!   FIXME in the refactor, this was dumb
+		// FIXME also check that we have less than 1000 users
 		to = from
 	}
 	if by <= 0 {
-		// ditto
+		// FIXME ditto
 		by = 1
 	}
 
-	//// Print headers
-	//fmt.Printf("General closed solution from PDQ where serviceTime = %g thinkTime time = %g\n",
-	//	serviceTime, thinkTime)
-	//
-	//if verbose {
-	//	fmt.Printf("Load\tThroughput\tUtilization\tQueueLen\tResidence\tResponse\n")
-	//} else {
-	//	fmt.Printf("\"# Load,\" Response\n")
-	//}
+	// Print headers
+	fmt.Printf("General closed solution from PDQ where serviceTime = %g thinkTime time = %g\n",
+		serviceTime, thinkTime)
+
+	if verbose {
+		fmt.Printf("Load\tThroughput\tUtilization\tQueueLen\tResidence\tResponse\n")
+	} else {
+		fmt.Printf("\"# Load,\" Response\n")
+	}
 
 	for load := from; load <= to; load += by {
 		doOneStep(load, thinkTime, serviceTime, verbose)
