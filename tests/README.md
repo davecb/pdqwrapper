@@ -21,3 +21,10 @@ where
 
 The combination of the last three has a limit
 
+
+## Go range of an array
+    nums := []int{2, 3, 4}
+    sum := 0
+    for _, num := range nums {
+        sum += num
+    }
