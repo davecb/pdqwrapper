@@ -8,17 +8,17 @@ import (
 )
 
 // PDQ constants (you'll need to implement or import these)
-const (
-	TERM  = 0
-	CEN   = 1
-	FCFS  = 2
-	EXACT = 3
-)
-
-var (
-	nodes   int
-	streams int
-)
+//const (
+//	TERM  = 0
+//	CEN   = 1
+//	FCFS  = 2
+//	EXACT = 3
+//)
+//
+//var (
+//	nodes   int
+//	streams int
+//)
 
 func usage(progName string) {
 	fmt.Fprintf(os.Stderr, "Usage: %s [-z think][-s service][-vd] from to by\n", progName)
@@ -26,9 +26,9 @@ func usage(progName string) {
 
 func main() {
 	var (
-		from          = 1
-		to            = 0
-		by            = 0
+		from          = 1.0
+		to            = 0.0
+		by            = 0.0
 		think         = 0.0
 		serviceDemand = 0.0
 		verbose       = false
@@ -67,43 +67,43 @@ func main() {
 
 	// Parse remaining arguments FIXME, these are floats
 	if i < len(os.Args) {
-		from, _ = strconv.Atoi(os.Args[i])
+		from, _ = strconv.ParseFloat(os.Args[i], 64)
 		i++
 	}
 	if i < len(os.Args) {
-		to, _ = strconv.Atoi(os.Args[i])
+		to, _ = strconv.ParseFloat(os.Args[i], 64)
 		i++
 	}
 	if i < len(os.Args) {
-		by, _ = strconv.Atoi(os.Args[i])
+		by, _ = strconv.ParseFloat(os.Args[i], 64)
 	}
 	Wrapper(progName, think, serviceDemand, from, to, by, verbose, debug)
 }
 
 // Wrapper is the code that calls the pdq library
-func Wrapper(progName string, thinkTime, serviceTime float64, from, to, by int, verbose, debug bool) error {
+func Wrapper(progName string, thinkTime, serviceTime, from, to, by float64, verbose, debug bool) error {
 	// Check parameters
-	// FIXME can these be floats??? The library accepts them, so yes. Future extension
-	if from < 0 {
-		return fmt.Errorf("%s: \"from\" is negative, which is not defined. Halting.", progName)
+	if thinkTime <= 0.0 {
+		return fmt.Errorf("%s: thinkTime == %g, which is negative or zero and not defined", progName, thinkTime) // FIXME halting should be reported by caller
 	}
-	if from == 0 {
-		// from is only well-defined for positives, but choosing is a common, harmless user error
-		from = 1
+	if serviceTime <= 0.0 {
+		return fmt.Errorf("%s: serviceTime == %g, which is negative or zero and not defined", progName, serviceTime)
 	}
-	if to <= 0 {
-		// this is bad code!   FIXME in the refactor, this was dumb
+
+	if from <= 0.0 {
+		return fmt.Errorf("%s: from == %g, which is zero or negative, and not defined", progName, from)
+	}
+	if to <= 0.0 {
 		// FIXME also check that we have less than 1000 users
-		to = from
+		return fmt.Errorf("%s: to == %g, which is zero or negative and not defined", progName, to)
 	}
-	if by <= 0 {
-		// FIXME ditto
-		by = 1
+	if by <= 0.0 {
+		return fmt.Errorf("%s: by == %g, which is zero or negative, and not defined", progName, by)
 	}
 
 	// Print headers
-	fmt.Printf("General closed solution from PDQ where serviceTime = %g thinkTime time = %g\n",
-		serviceTime, thinkTime)
+	fmt.Printf("General closed solution from PDQ where serviceTime = %g thinkTime = %g, progression = %g, %g, %g\n",
+		serviceTime, thinkTime, from, to, by)
 
 	if verbose {
 		fmt.Printf("Load\tThroughput\tUtilization\tQueueLen\tResidence\tResponse\n")
@@ -117,7 +117,7 @@ func Wrapper(progName string, thinkTime, serviceTime float64, from, to, by int, 
 	return nil
 }
 
-func doOneStep(load int, thinkTime, serviceTime float64, verbose bool) {
-	fmt.Fprintf(os.Stderr, "load = %d thinkTime = %g "+
+func doOneStep(load, thinkTime, serviceTime float64, verbose bool) {
+	fmt.Fprintf(os.Stderr, "load = %g thinkTime = %g "+
 		"serviceTime = %g verbose = %t\n", load, thinkTime, serviceTime, verbose)
 }
