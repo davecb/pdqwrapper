@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"math"
 	"testing"
 )
@@ -72,27 +71,31 @@ func Test_Wrapper(t *testing.T) {
 	for z, zStruct := range positiveFloat {
 		// think time "t" is a positive number, upper bound unknown
 		// sleep time "z" is synonymous with t
-		//fmt.Printf("z%d: Value = %d, Legal = %t\n",
-		//	z, zStruct.Value, zStruct.Legal)
 		for s, sStruct := range positiveFloat {
 			// s is service time, a positive number, upper bound unknown
 			for from, fromStruct := range positiveFloat {
+				// from is the initial load
+				for to, toStruct := range positiveFloat {
+					// to is the final load
+					// by is the step size
 
-				// inner test
-				legal := allTrue(zStruct.Legal, sStruct.Legal, fromStruct.Legal)
-				err := Wrapper("unit test", zStruct.Value, sStruct.Value, fromStruct.Value, 1, 1, false, false)
-				if err != nil {
-					// failure case
-					if legal {
-						t.Fatalf("%s, with z(%d) == %g, s(%d) == %g, from(%d) == %g\n",
-							err, z, zStruct.Value, s, sStruct.Value, from, fromStruct.Value)
-					}
-				} else {
-					// success case
-					if !legal {
-						log.Printf("oopsie!\n")
-						t.Fatalf("missing failure, with z(%d) == %g, s(%d) == %g, from(%d) == %g\n",
-							z, zStruct.Value, s, sStruct.Value, from, fromStruct.Value)
+					// inner test
+					legal := allTrue(zStruct.Legal, sStruct.Legal, fromStruct.Legal, toStruct.Legal)
+					err := Wrapper("unit test", zStruct.Value, sStruct.Value, fromStruct.Value, toStruct.Value, 10, false, false)
+					t.Logf("err == %s, with z(%d) == %g, s(%d) == %g, from(%d) == %g\n",
+						err, z, zStruct.Value, s, sStruct.Value, from, fromStruct.Value)
+					if err != nil {
+						// failure case
+						if legal {
+							t.Fatalf("err == %v, z(%d) == %g, s(%d) == %g, from(%d) == %g, to(%d) == %g\n",
+								err, z, zStruct.Value, s, sStruct.Value, from, fromStruct.Value, to, toStruct.Value)
+						}
+					} else {
+						// success case
+						if !legal {
+							t.Fatalf("missing failure, with z(%d) == %g, s(%d) == %g, from(%d) == %g\n",
+								z, zStruct.Value, s, sStruct.Value, from, fromStruct.Value)
+						}
 					}
 				}
 			}

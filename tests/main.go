@@ -102,14 +102,14 @@ func Wrapper(progName string, thinkTime, serviceTime, from, to, by float64, verb
 	}
 
 	// Print headers
-	fmt.Printf("General closed solution from PDQ where serviceTime = %g thinkTime = %g, progression = %g, %g, %g\n",
-		serviceTime, thinkTime, from, to, by)
-
-	if verbose {
-		fmt.Printf("Load\tThroughput\tUtilization\tQueueLen\tResidence\tResponse\n")
-	} else {
-		fmt.Printf("\"# Load,\" Response\n")
-	}
+	//fmt.Printf("General closed solution from PDQ where serviceTime = %g thinkTime = %g, progression = %g, %g, %g\n",
+	//	serviceTime, thinkTime, from, to, by)
+	//
+	//if verbose {
+	//	fmt.Printf("Load\tThroughput\tUtilization\tQueueLen\tResidence\tResponse\n")
+	//} else {
+	//	fmt.Printf("\"# Load,\" Response\n")
+	//}
 
 	for load := from; load <= to; load += by {
 		doOneStep(load, thinkTime, serviceTime, verbose)
@@ -118,6 +118,8 @@ func Wrapper(progName string, thinkTime, serviceTime, from, to, by float64, verb
 }
 
 func doOneStep(load, thinkTime, serviceTime float64, verbose bool) {
-	fmt.Fprintf(os.Stderr, "load = %g thinkTime = %g "+
-		"serviceTime = %g verbose = %t\n", load, thinkTime, serviceTime, verbose)
+	//fmt.Fprintf(os.Stderr, "load = %g thinkTime = %g "+
+	//	"serviceTime = %g verbose = %t\n", load, thinkTime, serviceTime, verbose)
+	//log.Printf("%g TBD\n", load)
+	//	"serviceTime = %g verbose = %t\n", load, thinkTime, serviceTime, verbose)
 }
