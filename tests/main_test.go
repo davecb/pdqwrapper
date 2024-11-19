@@ -68,39 +68,54 @@ func Test_Wrapper(t *testing.T) {
 		{math.MaxFloat64, true},
 	}
 
-	for z, zStruct := range positiveFloat {
-		// think time "t" is a positive number, upper bound unknown
-		// sleep time "z" is synonymous with t
-		for s, sStruct := range positiveFloat {
-			// s is service time, a positive number, upper bound unknown
-			for from, fromStruct := range positiveFloat {
-				// from is the initial load
-				for to, toStruct := range positiveFloat {
-					// to is the final load
-					// by is the step size
+	// initialize vars, for use developing the loops
+	var z, s, from, to, by int
+	var zStruct = floatSample{1.0, true}
+	var sStruct = floatSample{1.0, true}
+	var fromStruct = floatSample{1.0, true}
+	var toStruct = floatSample{1.0, true}
+	var byStruct = floatSample{1.0, true}
 
-					// inner test
-					legal := allTrue(zStruct.Legal, sStruct.Legal, fromStruct.Legal, toStruct.Legal)
-					err := Wrapper("unit test", zStruct.Value, sStruct.Value, fromStruct.Value, toStruct.Value, 10, false, false)
-					t.Logf("err == %s, with z(%d) == %g, s(%d) == %g, from(%d) == %g\n",
-						err, z, zStruct.Value, s, sStruct.Value, from, fromStruct.Value)
-					if err != nil {
-						// failure case
-						if legal {
-							t.Fatalf("err == %v, z(%d) == %g, s(%d) == %g, from(%d) == %g, to(%d) == %g\n",
-								err, z, zStruct.Value, s, sStruct.Value, from, fromStruct.Value, to, toStruct.Value)
-						}
-					} else {
-						// success case
-						if !legal {
-							t.Fatalf("missing failure, with z(%d) == %g, s(%d) == %g, from(%d) == %g\n",
-								z, zStruct.Value, s, sStruct.Value, from, fromStruct.Value)
-						}
-					}
-				}
+	//for z, zStruct = range positiveFloat {
+	// think time "t" is a positive number, upper bound unknown
+	// sleep time "z" is synonymous with t
+	//for s, sStruct := range positiveFloat {
+	//	// s is service time, a positive number, upper bound unknown
+	//	for from, fromStruct := range positiveFloat {
+	// from is the initial load
+	for to, toStruct = range positiveFloat {
+		// to is the final load, by is the step size, etc
+		// avoid testing really high values of to and by
+		if toStruct.Value > 4 || byStruct.Value > 4 {
+			continue
+		}
+		t.Logf("to(%d) == %g, %t\n", to, toStruct.Value, toStruct.Legal)
+		if to == 11 {
+			toStruct.Legal = true // hack: a place to breakpoint
+		}
+
+		// inner test
+		legal := allTrue(zStruct.Legal, sStruct.Legal, fromStruct.Legal, toStruct.Legal)
+		t.Logf("debug, with z(%d) == %g, s(%d) == %g, from(%d) == %g, to(%d) == %g, by(%d) == %g, legal == %t\n",
+			z, zStruct.Value, s, sStruct.Value, from, fromStruct.Value, to, toStruct.Value, by, byStruct.Value, legal)
+		err := Wrapper("unit test", zStruct.Value, sStruct.Value, fromStruct.Value, toStruct.Value, byStruct.Value, false, false)
+		if err != nil {
+			// failure case
+			if legal {
+				t.Fatalf("missing success, with err == %v, z(%d) == %g, s(%d) == %g, from(%d) == %g, to(%d) == %g, by(%d) == %g, legal == %t\n",
+					err, z, zStruct.Value, s, sStruct.Value, from, fromStruct.Value, to, toStruct.Value, by, byStruct.Value, legal)
+			}
+		} else {
+			// success case
+			if !legal {
+				t.Fatalf("missing failure, with z(%d) == %g, s(%d) == %g, from(%d) == %g, legal == %t\n",
+					z, zStruct.Value, s, sStruct.Value, from, fromStruct.Value, legal)
 			}
 		}
 	}
+	//}
+	//}
+	//}
 }
 
 // allTrue looks for any false values in a vector of booleans
