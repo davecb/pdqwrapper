@@ -1,7 +1,7 @@
 package main
 
 import (
-	"math"
+	//"math"
 	"testing"
 )
 
@@ -28,53 +28,54 @@ func Test_Wrapper(t *testing.T) {
 		Value float64
 		Legal bool
 	}
-	//var positiveInt []intSample
-	var positiveFloat []floatSample
+	type intSample struct {
+		Value int
+		Legal bool
+	}
 
-	//positiveInt = []intSample{
-	//	{-math.MaxInt64, false},
-	//	{-math.MaxInt64 + 1, false},
-	//	{-math.MaxInt64 / 2, false},
-	//	{-(math.MaxInt64 / 2) + 1, false},
-	//	{-3, false},
-	//	{-2, false},
-	//	{-1, false},
+	// a sample set for positive. Notice e inject some decimal
+	// values, not just integer values
+	//var positiveFloat []floatSample = []floatSample{
+	//	{-math.MaxFloat64 + 0, false},
+	//	{-math.MaxFloat64 + 1.1, false},
+	//	{-math.MaxFloat64/2 + .2, false},
+	//	{-(math.MaxFloat64 / 2) + 1.3, false},
+	//	{-3.4, false},
+	//	{-2.5, false},
+	//	{-1.6, false},
 	//	{0, false},
-	//	{1, true},
-	//	{2, true},
-	//	{3, true},
+	//	{1.7, true},
+	//	{2.8, true},
+	//	{3.9, true},
 	//	{4, true},
-	//	{(math.MaxInt64 / 2) - 1, true},
-	//	{(math.MaxInt64 / 2), true},
-	//	{math.MaxInt64 - 1, true},
-	//	{math.MaxInt64, true},
+	//	{(math.MaxFloat64 / 2) - 1, true},
+	//	{math.MaxFloat64 / 2, true},
+	//	{math.MaxFloat64 - 1, true},
+	//	{math.MaxFloat64, true},
 	//}
-	positiveFloat = []floatSample{
-		{-math.MaxFloat64 + 0, false},
-		{-math.MaxFloat64 + 1.1, false},
-		{-math.MaxFloat64/2 + .2, false},
-		{-(math.MaxFloat64 / 2) + 1.3, false},
-		{-3.4, false},
-		{-2.5, false},
-		{-1.6, false},
+
+	// a sample-set for small positive counters
+	var smallPositiveCounter []intSample = []intSample{
+		{-10, false},
+		{-5, false},
+		{-3, false},
+		{-2, false},
+		{-1, false},
 		{0, false},
-		{1.7, true},
-		{2.8, true},
-		{3.9, true},
-		{4, true},
-		{(math.MaxFloat64 / 2) - 1, true},
-		{math.MaxFloat64 / 2, true},
-		{math.MaxFloat64 - 1, true},
-		{math.MaxFloat64, true},
+		{1, true},
+		{2, true},
+		{3, true},
+		{5, true},
+		{10, true},
 	}
 
 	// initialize vars, for use developing the loops
 	var z, s, from, to, by int
 	var zStruct = floatSample{1.0, true}
 	var sStruct = floatSample{1.0, true}
-	var fromStruct = floatSample{1.0, true}
-	var toStruct = floatSample{1.0, true}
-	var byStruct = floatSample{1.0, true}
+	var fromStruct = intSample{1, true}
+	var toStruct = intSample{1, true}
+	var byStruct = intSample{1, true}
 
 	//for z, zStruct = range positiveFloat {
 	// think time "t" is a positive number, upper bound unknown
@@ -83,33 +84,26 @@ func Test_Wrapper(t *testing.T) {
 	//	// s is service time, a positive number, upper bound unknown
 	//	for from, fromStruct := range positiveFloat {
 	// from is the initial load
-	for to, toStruct = range positiveFloat {
-		// to is the final load, by is the step size, etc
-		// avoid testing really high values of to and by
-		if toStruct.Value > 4 || byStruct.Value > 4 {
-			continue
-		}
-		t.Logf("to(%d) == %g, %t\n", to, toStruct.Value, toStruct.Legal)
-		if to == 11 {
-			toStruct.Legal = true // hack: a place to breakpoint
-		}
+	for to, toStruct = range smallPositiveCounter {
+		// to is the final load, by is the step size, etc.
+		t.Logf("to(%d) == %d, %t\n", to, toStruct.Value, toStruct.Legal)
 
 		// inner test
 		legal := allTrue(zStruct.Legal, sStruct.Legal, fromStruct.Legal, toStruct.Legal)
-		t.Logf("debug, with z(%d) == %g, s(%d) == %g, from(%d) == %g, to(%d) == %g, by(%d) == %g, legal == %t\n",
+		t.Logf("debug, with z(%d) == %v, s(%d) == %v, from(%d) == %d, to(%d) == %d, by(%d) == %d, legal == %t\n",
 			z, zStruct.Value, s, sStruct.Value, from, fromStruct.Value, to, toStruct.Value, by, byStruct.Value, legal)
-		err := Wrapper("unit test", zStruct.Value, sStruct.Value, fromStruct.Value, toStruct.Value, byStruct.Value, false, false)
+		err := Wrapper("unit test", zStruct.Value, sStruct.Value, float64(fromStruct.Value), float64(toStruct.Value), float64(byStruct.Value), false, false)
 		if err != nil {
 			// failure case
 			if legal {
-				t.Fatalf("missing success, with err == %v, z(%d) == %g, s(%d) == %g, from(%d) == %g, to(%d) == %g, by(%d) == %g, legal == %t\n",
+				t.Fatalf("missing success, with err == %v, z(%d) == %v, s(%d) == %v, from(%d) == %v, to(%d) == %v, by(%d) == %v, legal == %t\n",
 					err, z, zStruct.Value, s, sStruct.Value, from, fromStruct.Value, to, toStruct.Value, by, byStruct.Value, legal)
 			}
 		} else {
 			// success case
 			if !legal {
-				t.Fatalf("missing failure, with z(%d) == %g, s(%d) == %g, from(%d) == %g, legal == %t\n",
-					z, zStruct.Value, s, sStruct.Value, from, fromStruct.Value, legal)
+				t.Fatalf("missing failure, with err == %v, z(%d) == %v, s(%d) == %v, from(%d) == %v, legal == %t\n",
+					err, z, zStruct.Value, s, sStruct.Value, from, fromStruct.Value, legal)
 			}
 		}
 	}
