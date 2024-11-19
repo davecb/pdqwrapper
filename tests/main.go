@@ -84,21 +84,21 @@ func main() {
 func Wrapper(progName string, thinkTime, serviceTime, from, to, by float64, verbose, debug bool) error {
 	// Check parameters
 	if thinkTime <= 0.0 {
-		return fmt.Errorf("%s: thinkTime == %g, which is negative or zero and not defined", progName, thinkTime) // FIXME halting should be reported by caller
+		return fmt.Errorf("%s: thinkTime == %g, which is negative or zero and not valid", progName, thinkTime) // FIXME halting should be reported by caller
 	}
 	if serviceTime <= 0.0 {
-		return fmt.Errorf("%s: serviceTime == %g, which is negative or zero and not defined", progName, serviceTime)
+		return fmt.Errorf("%s: serviceTime == %g, which is negative or zero and not valid", progName, serviceTime)
 	}
 
 	if from <= 0.0 {
-		return fmt.Errorf("%s: from == %g, which is zero or negative, and not defined", progName, from)
+		return fmt.Errorf("%s: from == %g, which is zero or negative, and not valid", progName, from)
 	}
 	if to <= 0.0 {
 		// FIXME also check that we have less than 1000 users
-		return fmt.Errorf("%s: to == %g, which is zero or negative and not defined", progName, to)
+		return fmt.Errorf("%s: to == %g, which is zero or negative and not valid", progName, to)
 	}
 	if by <= 0.0 {
-		return fmt.Errorf("%s: by == %g, which is zero or negative, and not defined", progName, by)
+		return fmt.Errorf("%s: by == %g, which is zero or negative, and not valid", progName, by)
 	}
 
 	// Print headers
