@@ -77,11 +77,11 @@ func main() {
 	if i < len(os.Args) {
 		by, _ = strconv.ParseFloat(os.Args[i], 64)
 	}
-	Wrapper(progName, think, serviceDemand, from, to, by, verbose, debug)
+	pdq(progName, think, serviceDemand, from, to, by, verbose, debug)
 }
 
-// Wrapper is the code that calls the pdq library
-func Wrapper(progName string, thinkTime, serviceTime, from, to, by float64, verbose, debug bool) error {
+// pdq is the code that calls the pdq library
+func pdq(progName string, thinkTime, serviceTime, from, to, by float64, verbose, debug bool) error {
 	// Check parameters
 	if thinkTime <= 0.0 {
 		return fmt.Errorf("%s: thinkTime == %g, which is negative or zero and not valid", progName, thinkTime) // FIXME halting should be reported by caller
@@ -118,8 +118,26 @@ func Wrapper(progName string, thinkTime, serviceTime, from, to, by float64, verb
 }
 
 func doOneStep(load, thinkTime, serviceTime float64, verbose bool) {
-	//fmt.Fprintf(os.Stderr, "load = %g thinkTime = %g "+
-	//	"serviceTime = %g verbose = %t\n", load, thinkTime, serviceTime, verbose)
-	//log.Printf("%g TBD\n", load)
-	//	"serviceTime = %g verbose = %t\n", load, thinkTime, serviceTime, verbose)
+	serverName := ""
+
+	PDQ_Init("closed uniserver")
+	streams = PDQ_CreateClosed("work", TERM, load, think)
+
+	serverName = "server0"
+	nodes = PDQ_CreateNode(serverName, CEN, FCFS)
+	PDQ_SetDemand(serverName, "work", serviceDemand)
+
+	PDQ_Solve(EXACT)
+
+	if verbose {
+		fmt.Printf("%d\t%f\t%f\t%f\t%f\t%f\n",
+			int(load),
+			PDQ_GetThruput(TERM, "work"),
+			PDQ_GetUtilization("server0", "work", TERM),
+			PDQ_GetQueueLength("server0", "work", TERM),
+			PDQ_GetResidenceTime("server0", "work", TERM),
+			PDQ_GetResponse(TERM, "work"))
+	} else {
+		fmt.Printf("%d,\t%f\n", int(load), PDQ_GetResponse(TERM, "work"))
+	}
 }

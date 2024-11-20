@@ -113,14 +113,14 @@ func main() {
 }
 
 func doOneStep(load, think, serviceDemand float64, verbose bool) {
-	serverName := ""
+	nodeName := ""
 
 	PDQ_Init("closed uniserver")
 	streams = PDQ_CreateClosed("work", TERM, load, think)
 
-	serverName = "server0"
-	nodes = PDQ_CreateNode(serverName, CEN, FCFS)
-	PDQ_SetDemand(serverName, "work", serviceDemand)
+	nodeName = "server0"
+	nodes = PDQ_CreateNode(nodeName, CEN, FCFS)
+	PDQ_SetDemand(nodeName, "work", serviceDemand)
 
 	PDQ_Solve(EXACT)
 
