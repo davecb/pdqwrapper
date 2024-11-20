@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/davecb/pdqwrapper/tests/pdqWrapper"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -26,13 +27,12 @@ func usage(progName string) {
 
 func main() {
 	var (
-		from          = 1.0
-		to            = 0.0
-		by            = 0.0
-		think         = 0.0
-		serviceDemand = 0.0
-		verbose       = false
-		debug         = false
+		thinkTime   = 0.0
+		serviceTime = 0.0
+		from        = 1.0
+		to          = 0.0
+		by          = 0.0
+		verbose     = false // unused
 	)
 
 	progName := filepath.Base(os.Args[0])
@@ -42,21 +42,19 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Parse command line arguments
+	// Parse command line arguments  FIXME, use flags package
 	i := 1
 	for i < len(os.Args) && os.Args[i][0] == '-' {
 		switch os.Args[i][1] {
 		case 'h':
 			usage(progName)
-			exit(0)
+			os.Exit(0)
 		case 'z', 't':
 			i++
-			think, _ = strconv.ParseFloat(os.Args[i], 64)
-		case 'd', 'x':
-			debug = true
+			thinkTime, _ = strconv.ParseFloat(os.Args[i], 64)
 		case 's':
 			i++
-			serviceDemand, _ = strconv.ParseFloat(os.Args[i], 64)
+			serviceTime, _ = strconv.ParseFloat(os.Args[i], 64)
 		case 'v':
 			verbose = true
 		default:
@@ -94,8 +92,8 @@ func main() {
 	}
 
 	// Print headers
-	fmt.Printf("General closed solution from PDQ where serviceDemand = %g think time = %g\n",
-		serviceDemand, think)
+	fmt.Printf("General closed solution from PDQ where serviceTime = %g thinkTime time = %g\n",
+		serviceTime, thinkTime)
 
 	if verbose {
 		fmt.Printf("Load\tThroughput\tUtilization\tQueueLen\tResidence\tResponse\n")
@@ -104,36 +102,32 @@ func main() {
 	}
 
 	for load := from; load <= to; load += by {
-		doOneStep(load, think, serviceDemand, verbose)
-	}
-
-	if debug {
-		PDQ_Report()
+		doOneStep(load, thinkTime, serviceTime)
 	}
 }
 
-func doOneStep(load, think, serviceDemand float64, verbose bool) {
-	nodeName := ""
+func doOneStep(load, thinkTime, serviceTime float64) {
 
-	PDQ_Init("closed uniserver")
-	streams = PDQ_CreateClosed("work", TERM, load, think)
+	s := "closed uniserver"
+	pdqWrapper.Init(s)
 
-	nodeName = "server0"
-	nodes = PDQ_CreateNode(nodeName, CEN, FCFS)
-	PDQ_SetDemand(nodeName, "work", serviceDemand)
+	modelName := "work"
+	pdqWrapper.CreateClosed(modelName, load, thinkTime) {
 
-	PDQ_Solve(EXACT)
+		nodeName := "server0"
+		pdqWrapper.CreateNode(nodeName)
 
-	if verbose {
-		fmt.Printf("%d\t%f\t%f\t%f\t%f\t%f\n",
-			int(load),
-			PDQ_GetThruput(TERM, "work"),
-			PDQ_GetUtilization("server0", "work", TERM),
-			PDQ_GetQueueLength("server0", "work", TERM),
-			PDQ_GetResidenceTime("server0", "work", TERM),
-			PDQ_GetResponse(TERM, "work"))
-	} else {
-		fmt.Printf("%d,\t%f\n", int(load), PDQ_GetResponse(TERM, "work"))
+		pdqWrapper.SetDemand(nodeName, modelName, serviceTime)
+
+		pdqWrapper.Solve() // FIXME exact?
+		r := pdqWrapper.Results(load)
+		fmt.Printf("%f\t%f\t%f\t%f\t%f\t%f\n",
+			load,
+			r.Throughput,
+			r.Utilization,
+			r.QueueLength,
+			r.ResidenceTime,
+			r.ResponseTime)
 	}
 }
 

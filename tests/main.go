@@ -116,28 +116,3 @@ func pdq(progName string, thinkTime, serviceTime, from, to, by float64, verbose,
 	}
 	return nil
 }
-
-func doOneStep(load, thinkTime, serviceTime float64, verbose bool) {
-	serverName := ""
-
-	PDQ_Init("closed uniserver")
-	streams = PDQ_CreateClosed("work", TERM, load, think)
-
-	serverName = "server0"
-	nodes = PDQ_CreateNode(serverName, CEN, FCFS)
-	PDQ_SetDemand(serverName, "work", serviceDemand)
-
-	PDQ_Solve(EXACT)
-
-	if verbose {
-		fmt.Printf("%d\t%f\t%f\t%f\t%f\t%f\n",
-			int(load),
-			PDQ_GetThruput(TERM, "work"),
-			PDQ_GetUtilization("server0", "work", TERM),
-			PDQ_GetQueueLength("server0", "work", TERM),
-			PDQ_GetResidenceTime("server0", "work", TERM),
-			PDQ_GetResponse(TERM, "work"))
-	} else {
-		fmt.Printf("%d,\t%f\n", int(load), PDQ_GetResponse(TERM, "work"))
-	}
-}
