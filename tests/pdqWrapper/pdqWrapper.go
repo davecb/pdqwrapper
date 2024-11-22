@@ -1,4 +1,4 @@
-package pdqWrapper
+package main // pdqWrapper
 
 // this simulates cc -g -o ./pdq pdq.c ../pdq5/lib/*.o -lm
 // see also http://www.perfdynamics.com/Tools/PDQman.html
@@ -18,17 +18,17 @@ const (
 // Init is the startup function for the pdq library
 func Init(junk string) {
 	var title string = "closed uniserver"
-	C.PDQ_Init(C.Cstring(title)) // title for the report
-	//C.PDQ_Init(C.Cstring("closed uniserver"))
+	C.PDQ_Init(C.CString(title)) // title for the report
+	//C.PDQ_Init(C.CString("closed uniserver"))
 	// eg, PDQ_Init("closed uniserver"). See example below.
-	// note: C.Cstring generates garbage, consider
+	// note: C.CString generates garbage, consider
 	// var cmsg *C.char = C.CString("hi")
 	// defer C.free(unsafe.Pointer(cmsg))
 }
 
 // CreatClosed creates a  closed queue model, with a name, load and think-time
 func CreateClosed(modelName string, load, think float64) {
-	C.PDQ_CreateClosed(C.Cstring(modelName), C.double(load), C.double(think))
+	C.PDQ_CreateClosed(C.CString(modelName), C.int(TERM), C.double(load), C.double(think))
 	// Caution, the library used to return a count, which is unused
 	// the modelName is used several places. For a simple model, use "work"
 	// eg, 	modelName = "work"; streams = PDQ_CreateClosed(modelName, TERM, load, think)
@@ -36,7 +36,7 @@ func CreateClosed(modelName string, load, think float64) {
 
 // CreateNodes creates a named server node
 func CreateNode(serverName string) {
-	C.PDQ_CreateNode(C.Cstring(serverName), C.int(CEN), C.int(FCFS))
+	C.PDQ_CreateNode(C.CString(serverName), C.int(CEN), C.int(FCFS))
 	// Caution, the library used to return a count, which is unused
 	//the nodeName is used several places. For a simple model, use "server0"
 	//eg nodeName = "server0"; nodes = PDQ_CreateNode(nodeName, CEN, FCFS)
@@ -44,7 +44,7 @@ func CreateNode(serverName string) {
 
 // SetDemand set the service-time, AKA service-demand, of a specified server and model
 func SetDemand(nodeName, modelName string, serviceTime float64) {
-	C.PDQ_SetDemand(C.Cstring(nodeName), C.Cstring(modelName), C.double(serviceTime))
+	C.PDQ_SetDemand(C.CString(nodeName), C.CString(modelName), C.double(serviceTime))
 	// eg, PDQ_SetDemand("server0", "work", serviceDemand)
 }
 
@@ -67,11 +67,11 @@ type Report struct {
 func Results(load float64) Report {
 	return Report{
 		load,
-		C.PDQ_GetThruput(C.int(TERM), C.Cstring("work")),
-		C.PDQ_GetUtilization("server0", "work", TERM),
-		C.PDQ_GetQueueLength("server0", "work", TERM),
-		C.PDQ_GetResidenceTime("server0", "work", TERM),
-		C.PDQ_GetResponse(TERM, "work"),
+		float64(C.PDQ_GetThruput(C.int(TERM), C.CString("work"))),
+		float64(C.PDQ_GetUtilization(C.CString("server0"), C.CString("work"), C.int(TERM))),
+		float64(C.PDQ_GetQueueLength(C.CString("server0"), C.CString("work"), C.int(TERM))),
+		float64(C.PDQ_GetResidenceTime(C.CString("server0"), C.CString("work"), C.int(TERM))),
+		float64(C.PDQ_GetResponse(C.int(TERM), C.CString("work"))),
 	}
 }
 
