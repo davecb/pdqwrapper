@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/davecb/pdqwrapper/tests/pdqWrapper"
+	"github.com/davecb/pdqwrapper/tests/pdqWrapperDirs"
 	"os"
 	"path/filepath"
 	"strconv"
