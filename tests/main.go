@@ -22,6 +22,7 @@ import (
 
 func usage(progName string) {
 	fmt.Fprintf(os.Stderr, "Usage: %s [-z think][-s service][-vd] from to by\n", progName)
+	// if you "go build" this file, it will be without parameters, and this is what you will get
 }
 
 func main() {
@@ -84,21 +85,21 @@ func main() {
 func pdq(progName string, thinkTime, serviceTime, from, to, by float64, verbose, debug bool) error {
 	// Check parameters
 	if thinkTime <= 0.0 {
-		return fmt.Errorf("%s: thinkTime == %g, which is negative or zero and not valid", progName, thinkTime) // FIXME halting should be reported by caller
+		return fmt.Errorf("%s: thinkTime == %g, which is non-positive and not valid", progName, thinkTime) // FIXME halting should be reported by caller
 	}
 	if serviceTime <= 0.0 {
-		return fmt.Errorf("%s: serviceTime == %g, which is negative or zero and not valid", progName, serviceTime)
+		return fmt.Errorf("%s: serviceTime == %g, which is non-positive and not valid", progName, serviceTime)
 	}
 
 	if from <= 0.0 {
-		return fmt.Errorf("%s: from == %g, which is zero or negative, and not valid", progName, from)
+		return fmt.Errorf("%s: from == %g, which is non-positive, and not valid", progName, from)
 	}
 	if to <= 0.0 {
 		// FIXME also check that we have less than 1000 users
-		return fmt.Errorf("%s: to == %g, which is zero or negative and not valid", progName, to)
+		return fmt.Errorf("%s: to == %g, which is non-positive and not valid", progName, to)
 	}
 	if by <= 0.0 {
-		return fmt.Errorf("%s: by == %g, which is zero or negative, and not valid", progName, by)
+		return fmt.Errorf("%s: by == %g, which is non-positive, and not valid", progName, by)
 	}
 
 	// Print headers
@@ -115,4 +116,9 @@ func pdq(progName string, thinkTime, serviceTime, from, to, by float64, verbose,
 		doOneStep(load, thinkTime, serviceTime, verbose)
 	}
 	return nil
+}
+
+// doOneStep is a function to exercise the library itself: FIXME unimplemented
+func doOneStep(load, thinkTime, serviceTime float64, verbose bool) {
+	// do nothing
 }

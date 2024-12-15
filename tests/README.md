@@ -28,3 +28,9 @@ The combination of the last three has a limit
     for _, num := range nums {
         sum += num
     }
+
+
+CGO hates static libraries.
+SWIG may be the replacement
+links added to ACM with David J. Brown folder
+

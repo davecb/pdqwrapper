@@ -21,8 +21,8 @@ const (
 
 // Init is the startup function for the pdq library
 func Init(junk string) {
-	var title string = "closed uniserver"
-	C.PDQ_Init(C.CString(title)) // title for the report
+	//var title string = "closed uniserver"
+	//C.PDQ_Init(C.CString(title)) // title for the report
 	//C.PDQ_Init(C.CString("closed uniserver"))
 	// eg, PDQ_Init("closed uniserver"). See example below.
 	// note: C.CString generates garbage, consider

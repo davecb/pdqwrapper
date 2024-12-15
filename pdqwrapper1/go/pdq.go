@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/davecb/pdqwrapper/tests/pdqWrapperDirs"
+	// "github.com/davecb/pdqwrapper/tests/pdqWrapperDirs"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -91,10 +91,9 @@ func main() {
 		by = 1.0
 	}
 
-	// Print headers
+	// Print headers for call to shared library
 	fmt.Printf("General closed solution from PDQ where serviceTime = %g thinkTime time = %g\n",
 		serviceTime, thinkTime)
-
 	if verbose {
 		fmt.Printf("Load\tThroughput\tUtilization\tQueueLen\tResidence\tResponse\n")
 	} else {

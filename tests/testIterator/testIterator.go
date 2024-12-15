@@ -51,7 +51,7 @@ var SmallPositiveCounter = []IntSample{
 }
 
 // AllTrue looks for any false values in a vector of booleans
-// typically used like testIterator.AllTrue(this.Legal, that.Legal, etc
+// typically used like testIterator.AllTrue(this.Legal, that.Legal, etc)
 func AllTrue(b ...bool) bool {
 	for _, v := range b {
 		if !v {
