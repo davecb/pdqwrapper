@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/davecb/pdqwrapper/tests/testIterator"
+	"log"
+	"os"
 	"testing"
 	"time"
 )
@@ -19,22 +21,34 @@ import (
 // h is a usage flag, causing an exit
 
 // Test_cPdq writes a file to use to test the top-level non-main function
+// Run with  go test cPdq_test.go to produce cPdq_test.csv
 func Test_cPdq(t *testing.T) {
 
+	const verbose = false
+	const debug = false
 	// initialize vars, in part for use in developing the loops
 	var zStruct = testIterator.FloatSample{1.0, true}
 	var sStruct = testIterator.FloatSample{1.0, true}
 	var fromStruct = testIterator.IntSample{1, true}
 	var toStruct = testIterator.IntSample{10, true}
 	var byStruct = testIterator.IntSample{1, true}
-	const verbose = false
-	const debug = false
+
+	fileName := "cPdq_test.csv"
+	file, err := os.Create(fileName)
+	if err != nil {
+		log.Fatalf("failed to create file, error = %q\n", err)
+	}
+	defer func() {
+		if err := file.Close(); err != nil {
+			log.Fatalf("failed to close file, error = %q\n", err)
+		}
+	}()
 
 	var start = time.Now()
 	var count int
 
 	// write .csv header
-	fmt.Printf("#z, s, from, to, by, legal\n")
+	fmt.Fprintf(file, "#z, s, from, to, by, legal\n")
 
 	for _, sStruct = range testIterator.PositiveFloat {
 		// s is service time, a positive number, upper bound unknown
@@ -50,12 +64,13 @@ func Test_cPdq(t *testing.T) {
 						// inner test generation step
 						count++
 						legal := testIterator.AllTrue(sStruct.Legal, zStruct.Legal, fromStruct.Legal, toStruct.Legal, byStruct.Legal)
-						fmt.Printf("%v, %v, %v, %v, %v, %t\n",
+						fmt.Fprintf(file, "%v, %v, %v, %v, %v, %t\n",
 							zStruct.Value, sStruct.Value, float64(fromStruct.Value), float64(toStruct.Value), float64(byStruct.Value), legal)
 					}
 				}
 			}
 		}
 	}
-	t.Logf("%d tests run in %v\n", count, time.Since(start))
+	t.Logf("file %q, containing %d tests, generated in %v\n",
+		fileName, count, time.Since(start))
 }
