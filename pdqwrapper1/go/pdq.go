@@ -2,18 +2,10 @@ package main
 
 import (
 	"fmt"
-	// "github.com/davecb/pdqwrapper/tests/pdqWrapperDirs"
+	"github.com/davecb/pdqwrapper/tests/pdqWrapperDirs/pdqWrapper"
 	"os"
 	"path/filepath"
 	"strconv"
-)
-
-// PDQ constants (you'll need to implement or import these)
-const (
-	TERM  = 0
-	CEN   = 1
-	FCFS  = 2
-	EXACT = 3
 )
 
 var (

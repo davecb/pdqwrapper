@@ -21,9 +21,8 @@ import (
 // except startup and command-line parsing done in main()
 func Test_goPdq(t *testing.T) {
 
-	// initialize vars, in part for use in developing the loops
 	var z, s, from, to, by int
-	var zStruct = testIterator.FloatSample{} //1.0, true}
+	var zStruct = testIterator.FloatSample{}
 	var sStruct = testIterator.FloatSample{}
 	var fromStruct = testIterator.IntSample{}
 	var toStruct = testIterator.IntSample{}
@@ -55,6 +54,7 @@ func Test_goPdq(t *testing.T) {
 						if err != nil {
 							// failure case
 							if legal {
+								// provide detailed information about the failure, then stop.
 								t.Fatalf("missing success, with err == '%v', z(%d) == %v, s(%d) == %v, from(%d) == %v, to(%d) == %v, by(%d) == %v, legal == %t\n",
 									err, z, zStruct.Value, s, sStruct.Value, from, fromStruct.Value, to, toStruct.Value, by, byStruct.Value, legal)
 							}
