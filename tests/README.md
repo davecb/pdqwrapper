@@ -34,3 +34,4 @@ CGO hates static libraries.
 SWIG may be the replacement
 links added to ACM with David J. Brown folder
 
+Static libraries are a failure, switch back to go

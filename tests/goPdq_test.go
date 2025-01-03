@@ -7,7 +7,7 @@ import (
 )
 
 // The System Under Test (SUT) is func pdq(progName string, think, serviceDemand, from, to, by float64, verbose, debug bool)
-// t is a positive number, upper bound unknown
+// t, think, is a positive number, upper bound unknown
 // z sleep is synonymous with t
 // s is service time, positive number, upper bound unknown
 // from is a small positive number, defaulting to 1
@@ -17,16 +17,17 @@ import (
 // d is a debug flag
 // h is a usage flag, causing an exit
 
-// Test_goPdq test the top-level non-main function
+// Test_goPdq test the top-level non-main function. This tests everything
+// except startup and command-line parsing done in main()
 func Test_goPdq(t *testing.T) {
 
 	// initialize vars, in part for use in developing the loops
 	var z, s, from, to, by int
-	var zStruct = testIterator.FloatSample{1.0, true}
-	var sStruct = testIterator.FloatSample{1.0, true}
-	var fromStruct = testIterator.IntSample{1, true}
-	var toStruct = testIterator.IntSample{10, true}
-	var byStruct = testIterator.IntSample{1, true}
+	var zStruct = testIterator.FloatSample{} //1.0, true}
+	var sStruct = testIterator.FloatSample{}
+	var fromStruct = testIterator.IntSample{}
+	var toStruct = testIterator.IntSample{}
+	var byStruct = testIterator.IntSample{}
 	const verbose = false
 	const debug = false
 
