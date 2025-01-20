@@ -1,15 +1,31 @@
 package main
 
-//#cgo  LDFLAGS: -static -L/home/davecb/go/src/github.com/davecb/pdqwrapper/pdqwrapper1/pdq5/lib -llibpdq.a
-//#include "/home/davecb/go/src/github.com/davecb/pdqwrapper/pdqwrapper1/pdq5/lib/PDQ_Lib.h"
 import "C"
 import (
 	"fmt"
-	"github.com/davecb/pdqwrapper/tests/pdqWrapperDirs/pdqWrapper"
 	"os"
 	"path/filepath"
 	"strconv"
 )
+
+// FIXME, ${SRCDIR} is not recognized by cgo in the following
+
+/*
+#cgo  LDFLAGS: -static -L/home/davecb/go/src/github.com/davecb/pdqwrapper/pdqwrapper1/pdq5/lib -lpdq
+#include <stdio.h>
+#include <math.h>
+#include "/home/davecb/go/src/github.com/davecb/pdqwrapper/pdqwrapper1/pdq5/lib/PDQ_Lib.h"
+double exact(double d) {
+   return 0.0;
+}
+double floor(double d) {
+   return 0.0;
+}
+double ceil(double d) {
+ 	return 0.0;
+}
+*/
+import "C"
 
 var (
 	nodes   int
@@ -101,27 +117,39 @@ func main() {
 }
 
 func doOneStep(load, thinkTime, serviceTime float64) {
+	const (
+		TERM  = 11
+		CEN   = 4
+		FCFS  = 8
+		EXACT = 14
+	)
 
-	s := "closed uniserver"
-	pdqWrapper.Init(s)
+	var s *C.char = C.CString("closed uniserver")
+	// FIXME defer C.free(unsafe.Pointer(s))
+	C.PDQ_Init(s)
 
-	modelName := "work"
-	pdqWrapper.CreateClosed(modelName, load, thinkTime)
+	var modelName *C.char = C.CString("work")
+	// FIXME defer C.free(unsafe.Pointer(modelName))
+	C.PDQ_CreateClosed(modelName, TERM, C.double(load), C.double(thinkTime)) // could not determine kind of name for C.CreateClosed
+	//   PDQ_CreateClosed(char *name, int should_be_class, double pop, double think);
 
-	nodeName := "server0"
-	pdqWrapper.CreateNode(nodeName)
+	var nodeName *C.char = C.CString("server0")
+	// FIXME defer C.free(unsafe.Pointer(nodeName))
+	C.PDQ_CreateNode(nodeName, CEN, FCFS)
+	// nodes = PDQ_CreateNode(server_name, CEN, FCFS)
 
-	pdqWrapper.SetDemand(nodeName, modelName, serviceTime)
+	C.PDQ_SetDemand(nodeName, modelName, C.double(serviceTime))
 
-	pdqWrapper.Solve() // FIXME exact?
-	r := pdqWrapper.Results(load)
-	fmt.Printf("%f\t%f\t%f\t%f\t%f\t%f\n",
-		load,
-		r.Throughput,
-		r.Utilization,
-		r.QueueLength,
-		r.ResidenceTime,
-		r.ResponseTime)
+	C.PDQ_Solve(EXACT) // FIXME exact?
+	C.PDQ_Report()
+	//r := C.PDQ_Resulte(load)
+	//fmt.Printf("%f\t%f\t%f\t%f\t%f\t%f\n",
+	//	load,
+	//	r.Throughput,
+	//	r.Utilization,
+	//	r.QueueLength,
+	//	r.ResidenceTime,
+	//	dPDQ_GetResponse(int should_be_class, s)
 
 }
 
