@@ -84,8 +84,8 @@ func main() {
 	}
 
 	// Print headers for call to shared library
-	fmt.Printf("General closed solution from PDQ where serviceTime = %g thinkTime time = %g\n",
-		serviceTime, thinkTime)
+	fmt.Printf("General closed solution from PDQ where serviceTime = %g thinkTime time = %g from = %g, for = %g by=%g\n",
+		serviceTime, thinkTime, from, to, by)
 	if verbose {
 		fmt.Printf("Load\tThroughput\tUtilization\tQueueLen\tResidence\tResponse\n")
 	} else {

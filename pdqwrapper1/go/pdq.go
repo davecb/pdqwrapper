@@ -1,8 +1,8 @@
 package main
 
-import "C"
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -53,7 +53,6 @@ func main() {
 		from        = 1.0
 		to          = 0.0
 		by          = 0.0
-		verbose     = false // unused
 	)
 
 	progName := filepath.Base(os.Args[0])
@@ -76,8 +75,6 @@ func main() {
 		case 's':
 			i++
 			serviceTime, _ = strconv.ParseFloat(os.Args[i], 64)
-		case 'v':
-			verbose = true
 		default:
 			fmt.Fprintf(os.Stderr, "%s: unknown option -%c, ignored.\n", progName, os.Args[i][1])
 		}
@@ -96,36 +93,47 @@ func main() {
 	if i < len(os.Args) {
 		by, _ = strconv.ParseFloat(os.Args[i], 64)
 	}
+	err := pdq(progName, thinkTime, serviceTime, from, to, by, -1)
+	if err != nil {
+		log.Fatalf("pdq error = %v, halting", err)
+	}
+}
+
+// pdq is the code that calls the pdq library. it is distinct from main
+func pdq(progName string, thinkTime, serviceTime, from, to, by float64, line int) error {
+	args := fmt.Sprintf("thinkTime = %v, serviceTime = %v, from = %v, to = %v, by = %v", thinkTime, serviceTime, from, to, by)
+	if line != -1 {
+		fmt.Printf("General closed solution from PDQ where line = %d %s\n", line, args)
+	} else {
+		fmt.Printf("Load\tThroughput\tUtilization\tQueueLen\tResidence\tResponse\n")
+	}
 
 	// Check parameters
-	if from < 0.0 {
-		fmt.Fprintf(os.Stderr, "%s: from is negative, which is not defined. Halting.", progName)
-		os.Exit(1)
+	if thinkTime <= 0.0 {
+		return fmt.Errorf("%s: thinkTime == %g, which is non-positive and not valid: %s", progName, thinkTime, args)
 	}
-	if from == 0.0 {
-		from = 1.0
+
+	// Check parameters
+	if from <= 0.0 {
+		return fmt.Errorf("%s: from == ^g, which is non-positive and not valid: %s", progName, args)
 	}
+	// FIXME all these defaults look bogus!
 	if to <= 0.0 {
 		to = from
 	}
 	if by <= 0.0 {
 		by = 1.0
 	}
-
-	// Print headers for call to shared library
-	fmt.Printf("General closed solution from PDQ where serviceTime = %g thinkTime time = %g\n",
-		serviceTime, thinkTime)
-	if verbose {
-		fmt.Printf("Load\tThroughput\tUtilization\tQueueLen\tResidence\tResponse\n")
-	} else {
-		fmt.Printf("\"# Load,\" Response\n")
-	}
+	// FIXME if there are interrelationship limits, test them here
 
 	for load := from; load <= to; load += by {
 		doOneStep(load, thinkTime, serviceTime)
 	}
+	return nil
 }
 
+// doOneStep does a model for one value of load and exits with an error on failure.
+// the latter is a feature of the library
 func doOneStep(load, thinkTime, serviceTime float64) {
 	const (
 		TERM  = 11
