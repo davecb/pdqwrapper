@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"unsafe"
 )
 
 // FIXME, ${SRCDIR} is not recognized by cgo in the following
@@ -13,6 +14,7 @@ import (
 /*
 #cgo  LDFLAGS: -static -L/home/davecb/go/src/github.com/davecb/pdqwrapper/pdqwrapper1/pdq5/lib -lpdq
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include "/home/davecb/go/src/github.com/davecb/pdqwrapper/pdqwrapper1/pdq5/lib/PDQ_Lib.h"
 double floor(double x) {
@@ -133,31 +135,31 @@ func doOneStep(load, thinkTime, serviceTime float64) {
 	)
 
 	var s *C.char = C.CString("closed uniserver")
-	// FIXME defer C.free(unsafe.Pointer(s))
+	defer C.free(unsafe.Pointer(s))
 	C.PDQ_Init(s)
 
 	var modelName *C.char = C.CString("work")
-	// FIXME defer C.free(unsafe.Pointer(modelName))
+	defer C.free(unsafe.Pointer(modelName))
 	C.PDQ_CreateClosed(modelName, TERM, C.double(load), C.double(thinkTime)) // could not determine kind of name for C.CreateClosed
-	//   PDQ_CreateClosed(char *name, int should_be_class, double pop, double think);
 
 	var nodeName *C.char = C.CString("server0")
-	// FIXME defer C.free(unsafe.Pointer(nodeName))
+	defer C.free(unsafe.Pointer(nodeName))
 	C.PDQ_CreateNode(nodeName, CEN, FCFS)
-	// nodes = PDQ_CreateNode(server_name, CEN, FCFS)
 
 	C.PDQ_SetDemand(nodeName, modelName, C.double(serviceTime))
 
-	C.PDQ_Solve(EXACT) // FIXME exact?
-	C.PDQ_Report()
-	//r := C.PDQ_Resulte(load)
-	//fmt.Printf("%f\t%f\t%f\t%f\t%f\t%f\n",
-	//	load,
-	//	r.Throughput,
-	//	r.Utilization,
-	//	r.QueueLength,
-	//	r.ResidenceTime,
-	//	dPDQ_GetResponse(int should_be_class, s)
+	C.PDQ_Solve(EXACT)
+
+	var work *C.char = C.CString("work")
+	defer C.free(unsafe.Pointer(work))
+
+	fmt.Printf("%d\t%f\t%f\t%f\t%f\t%f\n",
+		int(load),
+		C.PDQ_GetThruput(TERM, work),
+		C.PDQ_GetUtilization(nodeName, work, TERM),
+		C.PDQ_GetQueueLength(nodeName, work, TERM),
+		C.PDQ_GetResidenceTime(nodeName, work, TERM),
+		C.PDQ_GetResponse(TERM, work))
 
 }
 
