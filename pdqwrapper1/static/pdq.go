@@ -133,26 +133,23 @@ func doOneStep(load, thinkTime, serviceTime float64) {
 		FCFS  = 8
 		EXACT = 14
 	)
-
-	var s *C.char = C.CString("closed uniserver")
+	var (
+		s         *C.char = C.CString("closed uniserver")
+		modelName *C.char = C.CString("work")
+		nodeName  *C.char = C.CString("server0")
+		work      *C.char = C.CString("work")
+	)
 	defer C.free(unsafe.Pointer(s))
-	C.PDQ_Init(s)
-
-	var modelName *C.char = C.CString("work")
 	defer C.free(unsafe.Pointer(modelName))
-	C.PDQ_CreateClosed(modelName, TERM, C.double(load), C.double(thinkTime)) // could not determine kind of name for C.CreateClosed
-
-	var nodeName *C.char = C.CString("server0")
 	defer C.free(unsafe.Pointer(nodeName))
-	C.PDQ_CreateNode(nodeName, CEN, FCFS)
+	defer C.free(unsafe.Pointer(work))
 
+	C.PDQ_Init(s)
+	C.PDQ_CreateClosed(modelName, TERM, C.double(load), C.double(thinkTime))
+	C.PDQ_CreateNode(nodeName, CEN, FCFS)
 	C.PDQ_SetDemand(nodeName, modelName, C.double(serviceTime))
 
 	C.PDQ_Solve(EXACT)
-
-	var work *C.char = C.CString("work")
-	defer C.free(unsafe.Pointer(work))
-
 	fmt.Printf("%d\t%f\t%f\t%f\t%f\t%f\n",
 		int(load),
 		C.PDQ_GetThruput(TERM, work),
@@ -160,40 +157,4 @@ func doOneStep(load, thinkTime, serviceTime float64) {
 		C.PDQ_GetQueueLength(nodeName, work, TERM),
 		C.PDQ_GetResidenceTime(nodeName, work, TERM),
 		C.PDQ_GetResponse(TERM, work))
-
 }
-
-/*****
-Note that this translation assumes the existence of PDQ-related functions that would need to be implemented or imported from a Go PDQ library. The functions that need to be implemented include:
-
-PDQ_Init
-PDQ_CreateClosed
-PDQ_CreateNode
-PDQ_SetDemand
-PDQ_Solve
-PDQ_GetThruput
-PDQ_GetUtilization
-PDQ_GetQueueLength
-PDQ_GetResidenceTime
-PDQ_GetResponse
-PDQ_Report
-
-see https://karthikkaranth.me/blog/calling-c-code-from-go/
-and
-static:
-    gcc -c gb.c
-    ar -rcs libgb.a gb.o
-    go build -ldflags "-linkmode external -extldflags -static" bridge.go
-
-dynamic:
-    gcc -shared -o libgb.so gb.c
-    go build bridge.go
-*/
-
-/*
-intyrinsics missing
-double exact(double d) {
-   return 0.0;
-}
-
-*/
