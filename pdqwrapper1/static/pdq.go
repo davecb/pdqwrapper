@@ -15,14 +15,22 @@ import (
 #include <stdio.h>
 #include <math.h>
 #include "/home/davecb/go/src/github.com/davecb/pdqwrapper/pdqwrapper1/pdq5/lib/PDQ_Lib.h"
-double exact(double d) {
-   return 0.0;
+double floor(double x) {
+	double intpart;
+
+   if (x >= 0.0) {
+        return (double)((long long)x);
+    }
+    intpart = (double)((long long)x);
+    return (intpart == x) ? x : intpart - 1;
 }
-double floor(double d) {
-   return 0.0;
-}
-double ceil(double d) {
- 	return 0.0;
+double ceil(double x) {
+ 	 double intpart;
+    if (x <= 0.0) {
+        return (double)((long long)x);
+    }
+    intpart = (double)((long long)x);
+    return (intpart == x) ? x : intpart + 1;
 }
 */
 import "C"
@@ -178,4 +186,12 @@ static:
 dynamic:
     gcc -shared -o libgb.so gb.c
     go build bridge.go
+*/
+
+/*
+intyrinsics missing
+double exact(double d) {
+   return 0.0;
+}
+
 */
