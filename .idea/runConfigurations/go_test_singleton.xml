@@ -3,7 +3,7 @@
     <module name="pdqwrapper" />
     <working_directory value="$PROJECT_DIR$/pdqwrapper1/go/" />
     <go_parameters value="-v -run TestSingleton -ldflags '-extldflags &quot;-static&quot;' " />
-    <parameters value="-z 1.7 -s -1.7976931348623157e+308 -from 10 -to 10 -by 10" />
+    <parameters value="-z 1.7 -s -1.7976931348623157e+308 -from 1 -to 10000 -by 1" />
     <kind value="PACKAGE" />
     <package value="github.com/davecb/pdqwrapper/pdqwrapper1/go" />
     <directory value="$PROJECT_DIR$/pdqwrapper1/go" />

@@ -37,8 +37,9 @@ var PositiveFloat = []FloatSample{
 
 // SmallPositiveCounter is a sample-set for ... small positive counters!
 var SmallPositiveCounter = []IntSample{
-	{-10, false},
+	{-1000, false},
 	{-100, false},
+	{-10, false},
 	{-5, false},
 	{-3, false},
 	{-2, false},
@@ -50,6 +51,7 @@ var SmallPositiveCounter = []IntSample{
 	{5, true},
 	{10, true},
 	{100, true},
+	{1000, true},
 }
 
 // AllTrue looks for any false values in a vector of booleans

@@ -126,7 +126,11 @@ func pdq(progName string, thinkTime, serviceTime, from, to, by float64, line int
 	if by <= 0.0 {
 		return fmt.Errorf("%s: by == %g, which is non-positive and not valid: %s", progName, to, args)
 	}
-	// FIXME if there are interrelationship limits, test them here
+	// if there are interrelationship limits, test them here
+	steps := (to - from)
+	if steps <= 0.0 || steps/by > 999 {
+		return fmt.Errorf("%s: (to-from)/by  == %g, which is 1000 or more, and not valid: %s", progName, steps/by, args)
+	}
 
 	for load := from; load <= to; load += by {
 		doOneStep(load, thinkTime, serviceTime)
