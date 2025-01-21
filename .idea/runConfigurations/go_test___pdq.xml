@@ -1,0 +1,14 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="go test ./pdq" type="GoTestRunConfiguration" factoryName="Go Test">
+    <module name="pdqwrapper" />
+    <working_directory value="$PROJECT_DIR$/pdqwrapper1/go/" />
+    <go_parameters value="-v -ldflags '-extldflags &quot;-static&quot;'" />
+    <parameters value="-s 0.1 -z 0.9 -from 1 -to 1 -by 1" />
+    <kind value="FILE" />
+    <package value="github.com/davecb/pdqwrapper" />
+    <directory value="$PROJECT_DIR$/tests/" />
+    <filePath value="$PROJECT_DIR$/pdqwrapper1/go/pdq_test.go" />
+    <framework value="gotest" />
+    <method v="2" />
+  </configuration>
+</component>

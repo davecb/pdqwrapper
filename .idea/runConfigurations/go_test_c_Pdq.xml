@@ -1,0 +1,13 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="go test c Pdq" type="GoTestRunConfiguration" factoryName="Go Test">
+    <module name="pdqwrapper" />
+    <working_directory value="$PROJECT_DIR$/tests" />
+    <go_parameters value="-v " />
+    <kind value="FILE" />
+    <package value="github.com/davecb/pdqwrapper" />
+    <directory value="$PROJECT_DIR$/tests/" />
+    <filePath value="$PROJECT_DIR$/tests/cPdq_test.go" />
+    <framework value="gotest" />
+    <method v="2" />
+  </configuration>
+</component>
