@@ -19,7 +19,7 @@ import (
 
 // Test_pdq test the top-level non-main function. This tests everything
 // except startup and command-line parsing done in main()
-func Test_pdq(t *testing.T) {
+func TestPdq(t *testing.T) {
 
 	var z, s, from, to, by int
 	var zStruct = testIterator.FloatSample{}

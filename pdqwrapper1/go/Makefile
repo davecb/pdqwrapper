@@ -12,7 +12,10 @@ install: ./pdq
 	pdq -s 0.1 -z 0.9 1 10 1
 
 test:
-	go test .
+	go test -v -run TestPdq
+
+singleton:
+	go test -v -run TestSingleton -args -z=1.7 -s=-1.7976931348623157e+308 -from=1 -to=-10 -by=-10 -legal=false
 
 clean:
 	rm ./pdq
