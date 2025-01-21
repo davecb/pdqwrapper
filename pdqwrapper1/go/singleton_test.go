@@ -36,7 +36,7 @@ func TestSingleton(t *testing.T) {
 	t.Logf("nb = %v\n", by)
 	t.Logf("legal = %v\n", legal)
 
-	err := pdq("unit test", z, s, float64(from), float64(to), float64(by), -1)
+	err := pdq("unit test", z, s, float64(from), float64(to), float64(by), -1, legal)
 	if err != nil {
 		// failure case
 		if legal {

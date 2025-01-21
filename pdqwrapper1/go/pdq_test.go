@@ -48,7 +48,7 @@ func TestPdq(t *testing.T) {
 						// for development debugging only
 						//t.Logf("debug, with z(%d) == %v %t, s(%d) == %v %t, from(%d) == %d %t, to(%d) == %d %t, by(%d) == %d %t, legal == %t\n",
 						//	z, zStruct.Value, zStruct.Legal, s, sStruct.Value, sStruct.Legal, from, fromStruct.Value, fromStruct.Legal, to, toStruct.Value, toStruct.Legal, by, byStruct.Value, byStruct.Legal, legal)
-						err := pdq("unit test", zStruct.Value, sStruct.Value, float64(fromStruct.Value), float64(toStruct.Value), float64(byStruct.Value), count)
+						err := pdq("unit test", zStruct.Value, sStruct.Value, float64(fromStruct.Value), float64(toStruct.Value), float64(byStruct.Value), count, legal)
 						if err != nil {
 							// failure case
 							if legal {

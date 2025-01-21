@@ -15,7 +15,7 @@ type IntSample struct {
 }
 
 // PositiveFloat is a sample set for positive.
-// Notice we inject some decimal points, not just integer-equivalents
+// Notice we inject some decimal points, not just integer-equivalent floats
 var PositiveFloat = []FloatSample{
 	{-math.MaxFloat64 + 0, false},
 	{-math.MaxFloat64 + 1.1, false},
@@ -38,6 +38,7 @@ var PositiveFloat = []FloatSample{
 // SmallPositiveCounter is a sample-set for ... small positive counters!
 var SmallPositiveCounter = []IntSample{
 	{-10, false},
+	{-100, false},
 	{-5, false},
 	{-3, false},
 	{-2, false},
@@ -48,6 +49,7 @@ var SmallPositiveCounter = []IntSample{
 	{3, true},
 	{5, true},
 	{10, true},
+	{100, true},
 }
 
 // AllTrue looks for any false values in a vector of booleans

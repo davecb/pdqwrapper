@@ -15,7 +15,7 @@ test:
 	go test -v -run TestPdq
 
 singleton:
-	go test -v -run TestSingleton -args -z=1.7 -s=-1.7976931348623157e+308 -from=1 -to=-10 -by=-10 -legal=false
+	go test -v -run TestSingleton -args -z=1.7 -s=-1.7976931348623157e+308 -from=1 -to=10000 -by=1 -legal=false
 
 clean:
 	rm ./pdq

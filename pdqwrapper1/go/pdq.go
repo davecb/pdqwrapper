@@ -93,36 +93,38 @@ func main() {
 	if i < len(os.Args) {
 		by, _ = strconv.ParseFloat(os.Args[i], 64)
 	}
-	err := pdq(progName, thinkTime, serviceTime, from, to, by, -1)
+	err := pdq(progName, thinkTime, serviceTime, from, to, by, -1, true)
 	if err != nil {
 		log.Fatalf("pdq error = %v, halting", err)
 	}
 }
 
 // pdq is the code that calls the pdq library. it is distinct from main
-func pdq(progName string, thinkTime, serviceTime, from, to, by float64, line int) error {
-	args := fmt.Sprintf("thinkTime = %v, serviceTime = %v, from = %v, to = %v, by = %v", thinkTime, serviceTime, from, to, by)
-	if line != -1 {
-		fmt.Printf("General closed solution from PDQ where line = %d %s\n", line, args)
+func pdq(progName string, thinkTime, serviceTime, from, to, by float64, line int, legal bool) error {
+	args := fmt.Sprintf("-z=%v -s=%v -from=%v -to=%v -by=%v # legal=%v", thinkTime, serviceTime, from, to, by, legal)
+	if line == -1 {
+		// don't report line
+		fmt.Printf("General closed solution from PDQ where %s\n", args)
 	} else {
-		fmt.Printf("Load\tThroughput\tUtilization\tQueueLen\tResidence\tResponse\n")
+		fmt.Printf("General closed solution from PDQ where line=%d %s\n", line, args)
 	}
+	fmt.Printf("Load\tThroughput\tUtilization\tQueueLen\tResidence\tResponse\n")
 
 	// Check parameters
 	if thinkTime <= 0.0 {
 		return fmt.Errorf("%s: thinkTime == %g, which is non-positive and not valid: %s", progName, thinkTime, args)
 	}
-
-	// Check parameters
-	if from <= 0.0 {
-		return fmt.Errorf("%s: from == ^g, which is non-positive and not valid: %s", progName, args)
+	if serviceTime <= 0.0 {
+		return fmt.Errorf("%s: serviceTime == %g, which is non-positive and not valid: %s", progName, serviceTime, args)
 	}
-	// FIXME all these defaults look bogus!
+	if from <= 0.0 {
+		return fmt.Errorf("%s: from == %g, which is non-positive and not valid: %s", progName, from, args)
+	}
 	if to <= 0.0 {
-		to = from
+		return fmt.Errorf("%s: to == %g, which is non-positive and not valid: %s", progName, to, args)
 	}
 	if by <= 0.0 {
-		by = 1.0
+		return fmt.Errorf("%s: by == %g, which is non-positive and not valid: %s", progName, to, args)
 	}
 	// FIXME if there are interrelationship limits, test them here
 
