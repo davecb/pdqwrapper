@@ -17,7 +17,7 @@ import (
 // h is a usage flag, causing an exit
 
 var z, s, to, from, by float64
-var legal bool
+var legal, approximate bool
 
 func init() {
 	flag.Float64Var(&z, "z", 0.0, "sleepTime value")
@@ -26,6 +26,8 @@ func init() {
 	flag.Float64Var(&to, "to", 0.0, "to")
 	flag.Float64Var(&by, "by", 0.0, "by")
 	flag.BoolVar(&legal, "legal", false, "legal flag value")
+	flag.BoolVar(&approximate, "a", false, "approximate\tflag.BoolVar(&legal, \"legal\", false, \"legal flag value\")\n")
+
 }
 
 func TestSingleton(t *testing.T) {
@@ -36,7 +38,7 @@ func TestSingleton(t *testing.T) {
 	t.Logf("nb = %v\n", by)
 	t.Logf("legal = %v\n", legal)
 
-	err := pdq("unit test", z, s, float64(from), float64(to), float64(by), -1, legal)
+	err := pdq("unit test", z, s, float64(from), float64(to), float64(by), -1, legal, approximate)
 	if err != nil {
 		// failure case
 		if legal {

@@ -23,6 +23,7 @@ import (
 func TestPdq(t *testing.T) {
 
 	var z, s, from, to, by int
+	var approximate bool
 	var zStruct = testIterator.FloatSample{}
 	var sStruct = testIterator.FloatSample{}
 	var fromStruct = testIterator.IntSample{}
@@ -58,7 +59,7 @@ func TestPdq(t *testing.T) {
 							legal = false
 						}
 
-						err := pdq("unit test", zStruct.Value, sStruct.Value, float64(fromStruct.Value), float64(toStruct.Value), float64(byStruct.Value), count, legal)
+						err := pdq("unit test", zStruct.Value, sStruct.Value, float64(fromStruct.Value), float64(toStruct.Value), float64(byStruct.Value), count, legal, approximate)
 						if err != nil {
 							// failure case
 							if legal {

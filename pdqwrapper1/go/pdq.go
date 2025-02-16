@@ -48,11 +48,12 @@ func usage(progName string) {
 
 func main() {
 	var (
-		thinkTime   = 0.0
-		serviceTime = 0.0
-		from        = 1.0
-		to          = 0.0
-		by          = 0.0
+		thinkTime        = 0.0
+		serviceTime      = 0.0
+		from             = 1.0
+		to               = 0.0
+		by               = 0.0
+		approximate bool = false
 	)
 
 	progName := filepath.Base(os.Args[0])
@@ -75,6 +76,8 @@ func main() {
 		case 's':
 			i++
 			serviceTime, _ = strconv.ParseFloat(os.Args[i], 64)
+		case 'a':
+			approximate = true
 		default:
 			fmt.Fprintf(os.Stderr, "%s: unknown option -%c, ignored.\n", progName, os.Args[i][1])
 		}
@@ -93,15 +96,15 @@ func main() {
 	if i < len(os.Args) {
 		by, _ = strconv.ParseFloat(os.Args[i], 64)
 	}
-	err := pdq(progName, thinkTime, serviceTime, from, to, by, -1, true)
+	err := pdq(progName, thinkTime, serviceTime, from, to, by, -1, true, approximate)
 	if err != nil {
 		log.Fatalf("pdq error = %v, halting", err)
 	}
 }
 
 // pdq is the code that calls the pdq library. it is distinct from main
-func pdq(progName string, thinkTime, serviceTime, from, to, by float64, line int, legal bool) error {
-	args := fmt.Sprintf("-z=%v -s=%v -from=%v -to=%v -by=%v # legal=%v", thinkTime, serviceTime, from, to, by, legal)
+func pdq(progName string, thinkTime, serviceTime, from, to, by float64, line int, legal, approximate bool) error {
+	args := fmt.Sprintf("-z=%v -s=%v -from=%v -to=%v -by=%v legal=%v", thinkTime, serviceTime, from, to, by, legal)
 	if line == -1 {
 		// don't report line
 		fmt.Printf("General closed solution from PDQ where %s\n", args)
@@ -127,25 +130,29 @@ func pdq(progName string, thinkTime, serviceTime, from, to, by float64, line int
 		return fmt.Errorf("%s: by == %g, which is non-positive and not valid: %s", progName, to, args)
 	}
 	// if there are interrelationship limits, test them here
+
+	// FIXME, make sure this is what is whjat is actually called for
 	steps := (to - from)
-	if steps <= 0.0 || steps/by > 999 {
+	if steps < 0.0 || steps/by > 999 {
 		return fmt.Errorf("%s: (to-from)/by  == %g, which is 1000 or more, and not valid: %s", progName, steps/by, args)
 	}
+	//}
 
 	for load := from; load <= to; load += by {
-		doOneStep(load, thinkTime, serviceTime)
+		doOneStep(load, thinkTime, serviceTime, approximate)
 	}
 	return nil
 }
 
 // doOneStep does a model for one value of load and exits with an error on failure.
 // the latter is a feature of the library
-func doOneStep(load, thinkTime, serviceTime float64) {
+func doOneStep(load, thinkTime, serviceTime float64, approximate bool) {
 	const (
-		TERM  = 11
-		CEN   = 4
-		FCFS  = 8
-		EXACT = 14
+		TERM   = 11
+		CEN    = 4
+		FCFS   = 8
+		EXACT  = 14
+		APPROX = 15
 	)
 	var (
 		s         *C.char = C.CString("closed uniserver")
@@ -163,7 +170,11 @@ func doOneStep(load, thinkTime, serviceTime float64) {
 	C.PDQ_CreateNode(nodeName, CEN, FCFS)
 	C.PDQ_SetDemand(nodeName, modelName, C.double(serviceTime))
 
-	C.PDQ_Solve(EXACT)
+	//if approximate FIXME, make this conditional
+	C.PDQ_Solve(APPROX)
+	//} else {
+	//	C.PDQ_Solve(EXACT)
+	//}
 	fmt.Printf("%d\t%f\t%f\t%f\t%f\t%f\n",
 		int(load),
 		C.PDQ_GetThruput(TERM, work),
