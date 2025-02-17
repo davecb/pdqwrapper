@@ -48,12 +48,12 @@ func usage(progName string) {
 
 func main() {
 	var (
-		thinkTime        = 0.0
-		serviceTime      = 0.0
-		from             = 1.0
-		to               = 0.0
-		by               = 0.0
-		approximate bool = false
+		thinkTime   = 0.0
+		serviceTime = 0.0
+		from        = 1.0
+		to          = 0.0
+		by          = 0.0
+		err         error
 	)
 
 	progName := filepath.Base(os.Args[0])
@@ -72,12 +72,16 @@ func main() {
 			os.Exit(0)
 		case 'z', 't':
 			i++
-			thinkTime, _ = strconv.ParseFloat(os.Args[i], 64)
+			thinkTime, err = strconv.ParseFloat(os.Args[i], 64)
+			if err != nil {
+				log.Fatalf("parseFloat failed, can't happen. err = %v\n", err)
+			}
 		case 's':
 			i++
-			serviceTime, _ = strconv.ParseFloat(os.Args[i], 64)
-		case 'a':
-			approximate = true
+			serviceTime, err = strconv.ParseFloat(os.Args[i], 64)
+			if err != nil {
+				log.Fatalf("parseFloat failed, can't happen. err = %v\n", err)
+			}
 		default:
 			fmt.Fprintf(os.Stderr, "%s: unknown option -%c, ignored.\n", progName, os.Args[i][1])
 		}
@@ -86,24 +90,33 @@ func main() {
 
 	// Parse remaining arguments
 	if i < len(os.Args) {
-		from, _ = strconv.ParseFloat(os.Args[i], 64)
+		from, err = strconv.ParseFloat(os.Args[i], 64)
+		if err != nil {
+			log.Fatalf("parseFloat failed, can't happen. err = %v\n", err)
+		}
 		i++
 	}
 	if i < len(os.Args) {
-		to, _ = strconv.ParseFloat(os.Args[i], 64)
+		to, err = strconv.ParseFloat(os.Args[i], 64)
+		if err != nil {
+			log.Fatalf("parseFloat failed, can't happen. err = %v\n", err)
+		}
 		i++
 	}
 	if i < len(os.Args) {
-		by, _ = strconv.ParseFloat(os.Args[i], 64)
+		by, err = strconv.ParseFloat(os.Args[i], 64)
+		if err != nil {
+			log.Fatalf("parseFloat failed, can't happen. err = %v\n", err)
+		}
 	}
-	err := pdq(progName, thinkTime, serviceTime, from, to, by, -1, true, approximate)
+	err = pdq(progName, thinkTime, serviceTime, from, to, by, -1, true)
 	if err != nil {
 		log.Fatalf("pdq error = %v, halting", err)
 	}
 }
 
 // pdq is the code that calls the pdq library. it is distinct from main
-func pdq(progName string, thinkTime, serviceTime, from, to, by float64, line int, legal, approximate bool) error {
+func pdq(progName string, thinkTime, serviceTime, from, to, by float64, line int, legal bool) error {
 	args := fmt.Sprintf("-z=%v -s=%v -from=%v -to=%v -by=%v legal=%v", thinkTime, serviceTime, from, to, by, legal)
 	if line == -1 {
 		// don't report line
@@ -126,27 +139,30 @@ func pdq(progName string, thinkTime, serviceTime, from, to, by float64, line int
 	if to <= 0.0 {
 		return fmt.Errorf("%s: to == %g, which is non-positive and not valid: %s", progName, to, args)
 	}
+	if by == 0 {
+		by = 1 // Silly heuristic, but for a common usage error
+	}
 	if by <= 0.0 {
 		return fmt.Errorf("%s: by == %g, which is non-positive and not valid: %s", progName, to, args)
 	}
 	// if there are interrelationship limits, test them here
 
-	// FIXME, make sure this is what is whjat is actually called for
-	steps := (to - from)
-	if steps < 0.0 || steps/by > 999 {
-		return fmt.Errorf("%s: (to-from)/by  == %g, which is 1000 or more, and not valid: %s", progName, steps/by, args)
-	}
+	// FIXME, that was just plain wrong! Tried for EXACT
+	//steps := (to - from)
+	//if steps < 0.0 || steps/by > 999 {
+	//	return fmt.Errorf("%s: (to-from)/by  == %g, which is 1000 or more, and not valid: %s", progName, steps/by, args)
+	//}
 	//}
 
 	for load := from; load <= to; load += by {
-		doOneStep(load, thinkTime, serviceTime, approximate)
+		doOneStep(load, thinkTime, serviceTime)
 	}
 	return nil
 }
 
 // doOneStep does a model for one value of load and exits with an error on failure.
 // the latter is a feature of the library
-func doOneStep(load, thinkTime, serviceTime float64, approximate bool) {
+func doOneStep(load, thinkTime, serviceTime float64) {
 	const (
 		TERM   = 11
 		CEN    = 4

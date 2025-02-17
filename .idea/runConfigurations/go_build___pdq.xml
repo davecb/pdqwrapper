@@ -3,7 +3,7 @@
     <module name="pdqwrapper" />
     <working_directory value="$PROJECT_DIR$/pdqwrapper1/go" />
     <go_parameters value="-ldflags '-extldflags &quot;-static&quot;'" />
-    <parameters value="-a -s 0.1 -z 0.9 1 1 1" />
+    <parameters value="-s 0.1 -z 0.9 1 1 1" />
     <envs>
       <env name="CGO_ENABLED" value="1" />
     </envs>
