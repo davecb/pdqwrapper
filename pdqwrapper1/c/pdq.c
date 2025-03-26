@@ -21,7 +21,7 @@ void doOneStep(double load, double think, double serviceTime, int verbose);
 
  void
 usage() {
-	fprintf(stderr, "Usage: %s [-t think][-z sleep][-s service][-vd] "
+	fprintf(stderr, "Usage: %s [-z sleepTime][-s serviceTime][-vd] "
 		"from to by\n", ProgName);
 }
 
@@ -30,7 +30,7 @@ main(int argc, char **argv) {
 	double	from = 1.0,
 		to = 0.0,
 		by = 0.0,
-		think = 0.0,   
+		sleep = 0.0,
 		serviceTime = 0.0, 
 		load;
 	int	verbose = 0,
@@ -49,7 +49,7 @@ main(int argc, char **argv) {
 			switch (argv[i][1]) {
 			case 'z':
 			case 't':
-			    think = atof(argv[++i]);
+			    sleep = atof(argv[++i]);
 				break;
 			case 'h':
 				usage(ProgName);
@@ -76,8 +76,8 @@ main(int argc, char **argv) {
             ProgName);
         	exit(1);
 	}
-	if (think < 0.0) {
-	    (void) fprintf(stderr, "%s: -t is < 0.0 which is not supported. Halting.\n",
+	if (sleep < 0.0) {
+	    (void) fprintf(stderr, "%s: -z is < 0.0 which is not supported. Halting.\n",
                 ProgName);
             	exit(1);
 	}
@@ -112,17 +112,17 @@ main(int argc, char **argv) {
 
 	if (debug == 1) {
     	    (void) printf(
-                "serviceTime = %g "
-                "think time = %g "
+                "service time = %g "
+                "sleep time = %g "
                 "from %g "
                 "to = %g "
                 "by = %g\n",
-    	        serviceTime, think, from, to, by);
+    	        serviceTime, sleep, from, to, by);
     }
     /* Print headers. */
     printf("General closed solution from PDQ where "
-    	"serviceTime = %g think time = %g\n",
-           serviceTime, think);
+    	"serviceTime = %g sleep time = %g\n",
+           serviceTime, sleep);
     if (verbose) {
     	printf("Load\tThroughput\tUtilization\tQueueLen\t"
     		"Residence\tResponse\n");
@@ -131,7 +131,7 @@ main(int argc, char **argv) {
     	printf("Load\tResponse\n");
     }
 	for (load=from; load <= to; load += by) {
-		doOneStep(load, think, serviceTime, verbose);
+		doOneStep(load, sleep, serviceTime, verbose);
 	}
 	/* if (debug == 1) {
 	 *	PDQ_Report(); optional
@@ -145,7 +145,7 @@ main(int argc, char **argv) {
  * doOneStep -- do one solution step
  */
  void
-doOneStep(double load, double think, double serviceTime, int verbose) {
+doOneStep(double load, double sleep, double serviceTime, int verbose) {
 	extern int	nodes, streams;
 	static char server_name[80] = "";
 	int	i;
@@ -154,7 +154,7 @@ doOneStep(double load, double think, double serviceTime, int verbose) {
 	PDQ_Init("closed uniserver"); /* Name model. */
 
 	/* Define workload and queuing circuit type. */
-	streams = PDQ_CreateClosed("work", TERM, load, think); // * TERM, etc is defined in .h file */
+	streams = PDQ_CreateClosed("work", TERM, load, sleep); // * TERM, etc is defined in .h file */
 
 	/* Create a single node, with a demand of serviceTime */
 	(void) sprintf(server_name, "server0");

@@ -13,12 +13,12 @@ test:
 	go test -v -run TestPdq
 
 single: ./pdq # run just one case. for debugging
-	go test -v -run TestSingleton -args -z=1.7 -s=-1.7976931348623157e+308 -from=1 -to=10000 -by=1 -legal=false
+	go test -v -run TestSingleton -args -z 1.7 -s 1.7976931348623157e+308 1 10000 1
 
 clean:
 	rm ./pdq
 
 default: # for intellij
 	CGO_ENABLED=1 go build -ldflags '-extldflags "-static"' pdq.go
-	go test -v -run TestSingleton -args -z=1.7 -s=-1.7976931348623157e+308 -from=1 -to=10000 -by=1 -legal=false
+	go test -v -run TestSingleton -args -z 1.7 -s -1.7976931348623157e+308 1 10000 1
 

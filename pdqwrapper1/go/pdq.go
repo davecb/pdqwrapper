@@ -43,12 +43,12 @@ var (
 )
 
 func usage(progName string) {
-	fmt.Fprintf(os.Stderr, "Usage: %s [-z think][-s service][-vd] from to by\n", progName)
+	fmt.Fprintf(os.Stderr, "Usage: %s [-z sleep][-s service][-vd] from to by\n", progName)
 }
 
 func main() {
 	var (
-		thinkTime   = 0.0
+		sleepTime   = 0.0
 		serviceTime = 0.0
 		from        = 1.0
 		to          = 0.0
@@ -72,7 +72,7 @@ func main() {
 			os.Exit(0)
 		case 'z', 't':
 			i++
-			thinkTime, err = strconv.ParseFloat(os.Args[i], 64)
+			sleepTime, err = strconv.ParseFloat(os.Args[i], 64)
 			if err != nil {
 				log.Fatalf("parseFloat failed, can't happen. err = %v\n", err)
 			}
@@ -109,15 +109,15 @@ func main() {
 			log.Fatalf("parseFloat failed, can't happen. err = %v\n", err)
 		}
 	}
-	err = pdq(progName, thinkTime, serviceTime, from, to, by, -1, true)
+	err = pdq(progName, sleepTime, serviceTime, from, to, by, -1, true)
 	if err != nil {
 		log.Fatalf("pdq error = %v, halting", err)
 	}
 }
 
 // pdq is the code that calls the pdq library. it is distinct from main
-func pdq(progName string, thinkTime, serviceTime, from, to, by float64, line int, legal bool) error {
-	args := fmt.Sprintf("-z=%v -s=%v -from=%v -to=%v -by=%v legal=%v", thinkTime, serviceTime, from, to, by, legal)
+func pdq(progName string, sleepTime, serviceTime, from, to, by float64, line int, legal bool) error {
+	args := fmt.Sprintf("-z %v -s %v from %v to %v by %v", sleepTime, serviceTime, from, to, by)
 	if line == -1 {
 		// don't report line
 		fmt.Printf("General closed solution from PDQ where %s\n", args)
@@ -127,8 +127,8 @@ func pdq(progName string, thinkTime, serviceTime, from, to, by float64, line int
 	fmt.Printf("Load\tThroughput\tUtilization\tQueueLen\tResidence\tResponse\n")
 
 	// Check parameters
-	if thinkTime <= 0.0 {
-		return fmt.Errorf("%s: thinkTime == %g, which is non-positive and not valid: %s", progName, thinkTime, args)
+	if sleepTime <= 0.0 {
+		return fmt.Errorf("%s: sleepTime == %g, which is non-positive and not valid: %s", progName, sleepTime, args)
 	}
 	if serviceTime <= 0.0 {
 		return fmt.Errorf("%s: serviceTime == %g, which is non-positive and not valid: %s", progName, serviceTime, args)
@@ -155,14 +155,14 @@ func pdq(progName string, thinkTime, serviceTime, from, to, by float64, line int
 	//}
 
 	for load := from; load <= to; load += by {
-		doOneStep(load, thinkTime, serviceTime)
+		doOneStep(load, sleepTime, serviceTime)
 	}
 	return nil
 }
 
 // doOneStep does a model for one value of load and exits with an error on failure.
 // the latter is a feature of the library
-func doOneStep(load, thinkTime, serviceTime float64) {
+func doOneStep(load, sleepTime, serviceTime float64) {
 	const (
 		TERM   = 11
 		CEN    = 4
@@ -182,7 +182,7 @@ func doOneStep(load, thinkTime, serviceTime float64) {
 	defer C.free(unsafe.Pointer(work))
 
 	C.PDQ_Init(s)
-	C.PDQ_CreateClosed(modelName, TERM, C.double(load), C.double(thinkTime))
+	C.PDQ_CreateClosed(modelName, TERM, C.double(load), C.double(sleepTime))
 	C.PDQ_CreateNode(nodeName, CEN, FCFS)
 	C.PDQ_SetDemand(nodeName, modelName, C.double(serviceTime))
 
