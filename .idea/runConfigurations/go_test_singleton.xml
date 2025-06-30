@@ -9,6 +9,7 @@
     <directory value="$PROJECT_DIR$/pdqwrapper1/go" />
     <filePath value="$PROJECT_DIR$/pdqwrapper1/go/pdq_test.go" />
     <framework value="gotest" />
+    <pattern value="^\QTestSingleton\E$" />
     <method v="2" />
   </configuration>
 </component>
